@@ -3,6 +3,7 @@ import './App.css';
 import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
 import Home from './pages/home';
 import Exhibition from './pages/exhibition';
+import Login from './components/login';
 
 const App: React.FC = () => {
   return (
@@ -14,8 +15,11 @@ const App: React.FC = () => {
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/exhibition" element={<Exhibition />} />
+          
           {/* <Route path="/museum/:artwork_id" element={<Artwork />} /> */}
+
         </Routes>
+        <Login />
       </div>
     </Router>
   );
