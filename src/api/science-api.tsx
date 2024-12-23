@@ -1,7 +1,9 @@
 import axios from "axios";
 
+// Base URL for the Science Museum API
 const API_BASE_URL = "https://collection.sciencemuseumgroup.org.uk";
 
+// Fetch search results from Science Museum API
 export const fetchSearchResults = async (
   query: string,
   page: number = 0,
@@ -26,6 +28,7 @@ export const fetchSearchResults = async (
   }
 };
 
+// Fetch a single object by ID from Science Museum API
 export const fetchObjectById = async (id: string) => {
   try {
     const response = await axios.get(`${API_BASE_URL}/objects/${id}`, {

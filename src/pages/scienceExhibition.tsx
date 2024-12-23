@@ -1,11 +1,24 @@
+// In your parent component (e.g., SearchPage)
 import React, { useState, useEffect } from "react";
 import { fetchSearchResults } from "../api/science-api";
+import ArtworkCard from "../components/scienceCard";  // Make sure to import ArtworkCard
 
 const SearchPage: React.FC = () => {
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [favourites, setFavourites] = useState<any[]>([]);
+
+  const handleFavouriteToggle = (artwork: any) => {
+    setFavourites((prevFavourites) => {
+      if (prevFavourites.some((fav) => fav.id === artwork.id)) {
+        return prevFavourites.filter((fav) => fav.id !== artwork.id);
+      } else {
+        return [...prevFavourites, artwork];
+      }
+    });
+  };
 
   const handleSearch = async () => {
     setLoading(true);
@@ -38,17 +51,16 @@ const SearchPage: React.FC = () => {
       {loading && <p>Loading...</p>}
       {error && <p style={{ color: "red" }}>{error}</p>}
 
-      <ul>
+      <div>
         {results.map((item) => (
-          <li key={item.id}>
-            <p>Type: {item.type}</p>
-            <p>ID: {item.id}</p>
-            <a href={item.links.self} target="_blank" rel="noopener noreferrer">
-              View Item
-            </a>
-          </li>
+          <ArtworkCard
+            key={item.id}
+            artwork={item}
+            onFavouriteToggle={handleFavouriteToggle}
+            isFavourite={favourites.some((fav) => fav.id === item.id)}
+          />
         ))}
-      </ul>
+      </div>
     </div>
   );
 };
