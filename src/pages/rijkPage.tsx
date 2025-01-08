@@ -1,13 +1,23 @@
 import React, { useState, useEffect } from "react";
 import { RijksArtworkCollection } from "../api/apiMuseum";
-import { Card, CardContent, CardMedia, Typography, Grid } from "@mui/material";
-import { Link } from "react-router-dom";
+import ArtworkCard from "../components/scienceCard";
 
 const RijksmuseumPage: React.FC = () => {
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [favourites, setFavourites] = useState<any[]>([]);
+
+  const handleFavouriteToggle = (artwork: any) => {
+    setFavourites((prevFavourites) => {
+      if (prevFavourites.some((fav) => fav.id === artwork.id)) {
+        return prevFavourites.filter((fav) => fav.id !== artwork.id);
+      } else {
+        return [...prevFavourites, artwork];
+      }
+    });
+  };
 
   const handleSearch = async () => {
     setLoading(true);
@@ -40,34 +50,18 @@ const RijksmuseumPage: React.FC = () => {
       {loading && <p>Loading...</p>}
       {error && <p style={{ color: "red" }}>{error}</p>}
 
-      <Grid container spacing={4}>
+      <div>
         {results.map((item) => (
-          <Grid item xs={12} sm={6} md={4} key={item.id}>
-            <Card sx={{ maxWidth: 345 }}>
-              <Link to={`/rijk/${item.id}`} style={{ textDecoration: 'none' }}>
-                <CardMedia
-                  component="img"
-                  height="250"
-                  image={item.image || 'https://via.placeholder.com/250'}
-                  alt={item.title}
-                />
-                <CardContent>
-                  <Typography gutterBottom variant="h5" component="div">
-                    {item.title}
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    Artist: {item.artist}
-                  </Typography>
-                </CardContent>
-              </Link>
-            </Card>
-          </Grid>
+          <ArtworkCard
+            key={item.id}
+            artwork={item}
+            onFavouriteToggle={handleFavouriteToggle}
+            isFavourite={favourites.some((fav) => fav.id === item.id)}
+          />
         ))}
-      </Grid>
+      </div>
     </div>
   );
 };
 
 export default RijksmuseumPage;
-
-

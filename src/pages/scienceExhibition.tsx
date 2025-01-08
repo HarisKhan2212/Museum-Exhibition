@@ -1,7 +1,6 @@
-// In your parent component (e.g., SearchPage)
 import React, { useState, useEffect } from "react";
 import { fetchSearchResults } from "../api/science-api";
-import ArtworkCard from "../components/scienceCard";  // Make sure to import ArtworkCard
+import ArtworkCard from "../components/scienceCard";
 
 const SearchPage: React.FC = () => {
   const [query, setQuery] = useState("");
