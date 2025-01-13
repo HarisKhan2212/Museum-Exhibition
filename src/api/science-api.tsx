@@ -1,6 +1,5 @@
 import axios from "axios";
 
-// Base URL for the Science Museum API
 const API_BASE_URL = "https://collection.sciencemuseumgroup.org.uk";
 
 // Fetch search results from Science Museum API
@@ -15,6 +14,7 @@ export const fetchSearchResults = async (
         q: query,
         "page[number]": page,
         "page[size]": pageSize,
+        sort: "-date", 
       },
       headers: {
         Accept: "application/json",

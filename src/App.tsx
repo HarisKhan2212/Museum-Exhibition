@@ -2,11 +2,13 @@ import React, { useState, useEffect } from 'react';
 import './App.css';
 import { BrowserRouter as Router, Routes, Route, Link, useParams } from 'react-router-dom';
 import Home from './pages/home';
-import Exhibition from './pages/scienceExhibition';
 import Login from './components/login';
-import ArtworkCard from './components/scienceCard';
+import ArtworkCard from './components/artworkCard';
 import RijksmuseumPage from './pages/rijkPage';
-import { fetchObjectById } from './api/science-api';  
+import VAndAPage from './pages/vaPage';
+import FavouritesPage from './pages/favourites';
+import { FavouritesProvider } from './components/favourtiesContext';
+import { fetchObjectById } from './api/science-api';
 
 const App: React.FC = () => {
   const [artwork, setArtwork] = useState<any | null>(null);
@@ -44,39 +46,42 @@ const App: React.FC = () => {
   }, [artworkId]);
 
   return (
-    <Router>
-      <div>
-        <Link to="/">Home</Link>
-        <Login />
-        <Link to="/scienceMuseum">Science Museum</Link>
-        <Link to="/rijk">The Rijk</Link>
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/scienceMuseum" element={<Exhibition />} />
-          <Route path="/rijk" element={<RijksmuseumPage />} />
-          <Route
-            path="/rijk/:artworkId"
-            element={
+    <FavouritesProvider>
+      <Router>
+        <div>
+          <Link to="/">Home</Link>
+          <Login />
+          <Link to="/rijk">The Rijksmuseum</Link>
+          <Link to="/va">The V&A Museum</Link>  {}
+          <Link to="/favourites">Favourites</Link>
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/rijk" element={<RijksmuseumPage />} />
+            <Route path="/rijk/:artworkId" element={
               <ArtworkCard
                 artwork={artwork}
                 onFavouriteToggle={handleFavouriteToggle}
                 isFavourite={favourites.some((fav) => fav.id === artwork?.id)}
               />
-            }
-          />
-          <Route
-            path="/scienceMuseum/:artworkId"
-            element={
+            } />
+            <Route path="/va" element={<VAndAPage />} />  {}
+            <Route path="/va/:artworkId" element={
               <ArtworkCard
                 artwork={artwork}
                 onFavouriteToggle={handleFavouriteToggle}
                 isFavourite={favourites.some((fav) => fav.id === artwork?.id)}
               />
-            }
-          />
-        </Routes>
-      </div>
-    </Router>
+            } />
+            <Route path="/favourites" element={
+              <FavouritesPage
+                favourites={favourites}
+                onFavouriteToggle={handleFavouriteToggle}
+              />
+            } />
+          </Routes>
+        </div>
+      </Router>
+    </FavouritesProvider>
   );
 };
 

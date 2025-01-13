@@ -5,8 +5,8 @@ const RijksAPI = axios.create({
   baseURL: `https://www.rijksmuseum.nl/api/en/collection`,
 });
 
-const ScienceAPI = axios.create({
-  baseURL: `https://collection.sciencemuseumgroup.org.uk/api/objects`,
+const VAndAAPI = axios.create({
+  baseURL: `https://api.vam.ac.uk/v2/objects`,
   headers: {
     Accept: "application/json",
     "User-Agent": "YourProjectName/1.0",
@@ -16,62 +16,47 @@ const ScienceAPI = axios.create({
 // API keys
 const RIJKSMUSEUM_API_KEY = process.env.REACT_APP_RIJKSMUSEUM_API_KEY || "f09ex26I";
 
+// Interfaces
+interface Artwork {
+  id: string;
+  title: string;
+  artist: string;
+  image: string;
+  description: string;
+}
+
+interface FetchTerms {
+  type?: string;
+  page?: number;
+  selectedMuseums?: string[];
+}
+
 // Helper functions to parse the data
-const parseRijksData = (item: any) => ({
-  id: item.id,
-  title: item.title,
-  artist: item.principalOrFirstMaker,
-  image: item.webImage?.url,
+const parseRijksData = (item: any): Artwork => ({
+  id: item.objectNumber,
+  title: item.title || "Untitled",
+  artist: item.principalOrFirstMaker || "Unknown",
+  image: item.webImage?.url || "",
   description: item.plaqueDescriptionEnglish || "No description available.",
 });
 
-const parseScienceData = (item: any) => {
-  const primaryTitle = item?.attributes?.title?.find((t: any) => t?.primary)?.value || "Untitled";
-  const primaryDescription = item?.attributes?.description?.find((d: any) => d?.type === "web description")?.value || "No description available.";
-  const maker = item?.attributes?.creation?.maker?.[0]?.summary?.title || "Unknown";
-  const image = item?.attributes?.thumbnail?.large?.url || "";
+const parseVAndAData = (item: any): Artwork => {
+  // Log the full data to inspect the structure
+  console.log("Full item data:", JSON.stringify(item, null, 2)); // Log as a pretty JSON string for better readability
+  console.log("Title field:", item.titles); // Specifically log the 'titles' field
 
   return {
-    id: item?.id,
-    title: primaryTitle,
-    artist: maker,
-    image: image,
-    description: primaryDescription,
+    id: item.systemNumber,
+    title: item.titles?.[0]?._primaryTitle || "Untitled", // If this path is incorrect, we can adjust it based on the log
+    artist: item.primaryMaker?.name || "Unknown",
+    image: item._images?.primary_thumbnail || "",
+    description: item.summaryDescription || "No description available.",
   };
 };
 
-// Fetch a single artwork from Science Museum
-export const getOneScienceArt = async (id: string) => {
-  try {
-    const response = await ScienceAPI.get(`/${id}`);
-    console.log("Science Museum Artwork Details:", response.data);
-    return parseScienceData(response.data);
-  } catch (error: any) {
-    console.error("Error fetching Science Museum artwork:", error?.response?.status, error?.message);
-    throw error;
-  }
-};
-
-// Fetch multiple artworks from Science Museum
-export const ScienceArtworkCollection = async (terms: { type?: string; page?: number }) => {
-  const queryParams = {
-    q: terms.type || "*",
-    "page[number]": terms.page || 1,
-    "page[size]": 10,
-  };
-
-  try {
-    const response = await ScienceAPI.get(`/search`, { params: queryParams });
-    console.log("Science Museum Response Data:", response.data);
-    return response.data.data.map(parseScienceData);
-  } catch (error: any) {
-    console.error("Error fetching Science Museum collection:", error?.response?.status, error?.message);
-    throw error;
-  }
-};
 
 // Fetch a single artwork from Rijksmuseum
-export const getOneRijksArt = async (id: string) => {
+export const getOneRijksArt = async (id: string): Promise<Artwork> => {
   try {
     const response = await RijksAPI.get(`/${id}`, {
       params: {
@@ -81,13 +66,13 @@ export const getOneRijksArt = async (id: string) => {
     console.log("Rijksmuseum Artwork Details:", response.data.artObject);
     return parseRijksData(response.data.artObject);
   } catch (error: any) {
-    console.error("Error fetching Rijksmuseum artwork:", error?.response?.status, error?.message);
+    console.error("Error fetching Rijksmuseum artwork:", error);
     throw error;
   }
 };
 
 // Fetch multiple artworks from Rijksmuseum
-export const RijksArtworkCollection = async (terms: { type?: string; page?: number }) => {
+export const RijksArtworkCollection = async (terms: FetchTerms): Promise<Artwork[]> => {
   let query = `?key=${RIJKSMUSEUM_API_KEY}&ps=10&q=*`;
   if (terms.type) query += `&type=${terms.type}`;
   if (terms.page) query += `&p=${terms.page}`;
@@ -96,32 +81,61 @@ export const RijksArtworkCollection = async (terms: { type?: string; page?: numb
     const response = await RijksAPI.get(query);
     return response.data.artObjects.map(parseRijksData);
   } catch (error: any) {
-    console.error("Error fetching Rijksmuseum collection:", error?.response?.status, error?.message);
+    console.error("Error fetching Rijksmuseum collection:", error);
     throw error;
   }
 };
 
-// Combine artworks from Rijksmuseum and Science Museum
-export const CombinedArtworkCollection = async (terms: { type?: string; page?: number; selectedMuseums: string[] }) => {
-  const parsedData: any[] = [];
+// Fetch a single artwork from V&A Museum
+export const getOneVAndAArt = async (id: string): Promise<Artwork> => {
+  try {
+    const response = await VAndAAPI.get(`/${id}`);
+    console.log("V&A Museum Artwork Details:", response.data.records[0]);
+    return parseVAndAData(response.data.records[0]);
+  } catch (error: any) {
+    console.error("Error fetching V&A artwork:", error);
+    throw error;
+  }
+};
 
-  const rijksPromise = terms.selectedMuseums.includes("Rijksmuseum")
-    ? RijksArtworkCollection(terms).catch((error: any) => {
-        console.error("Rijksmuseum API Error:", error?.response?.status, error?.message);
+// Fetch multiple artworks from V&A Museum
+export const VAndAArtworkCollection = async (terms: FetchTerms): Promise<Artwork[]> => {
+  const queryParams = {
+    page: terms.page || 1,
+    page_size: 10,
+    q: terms.type || "",
+  };
+
+  try {
+    const response = await VAndAAPI.get(`/search`, { params: queryParams });
+    return response.data.records.map(parseVAndAData);
+  } catch (error: any) {
+    console.error("Error fetching V&A collection:", error);
+    throw error;
+  }
+};
+
+// Combine artworks from Rijksmuseum and V&A Museum
+export const CombinedArtworkCollection = async (terms: FetchTerms): Promise<Artwork[]> => {
+  const parsedData: Artwork[] = [];
+
+  const rijksPromise = terms.selectedMuseums?.includes("Rijksmuseum")
+    ? RijksArtworkCollection(terms).catch((error) => {
+        console.error("Rijksmuseum API Error:", error);
         return [];
       })
     : Promise.resolve([]);
 
-  const sciencePromise = terms.selectedMuseums.includes("Science Museum")
-    ? ScienceArtworkCollection(terms).catch((error: any) => {
-        console.error("Science Museum API Error:", error?.response?.status, error?.message);
+  const vandAPromise = terms.selectedMuseums?.includes("V&A Museum")
+    ? VAndAArtworkCollection(terms).catch((error) => {
+        console.error("V&A Museum API Error:", error);
         return [];
       })
     : Promise.resolve([]);
 
-  const [rijksData, scienceData] = await Promise.all([rijksPromise, sciencePromise]);
+  const [rijksData, vandAData] = await Promise.all([rijksPromise, vandAPromise]);
 
-  parsedData.push(...rijksData, ...scienceData);
+  parsedData.push(...rijksData, ...vandAData);
 
   console.log("Combined Artwork Collection:", parsedData);
   return parsedData;

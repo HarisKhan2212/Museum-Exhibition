@@ -1,27 +1,44 @@
 import React from "react";
-import { Card, CardMedia, CardContent, Typography, IconButton } from "@mui/material";
+import { Card, CardMedia, CardContent, Typography, IconButton, CircularProgress } from "@mui/material";
 import FavoriteIcon from "@mui/icons-material/Favorite";
 import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
 
+interface Artwork {
+  id: string;
+  image: string;
+  title: string;
+  artist?: string;
+  type?: string;
+  description?: string;
+}
+
 interface ArtworkCardProps {
-  artwork: any;
-  onFavouriteToggle: (artwork: any) => void;
+  artwork: Artwork;
+  onFavouriteToggle: (artwork: Artwork) => void;
   isFavourite: boolean;
 }
 
 const ArtworkCard: React.FC<ArtworkCardProps> = ({ artwork, onFavouriteToggle, isFavourite }) => {
   if (!artwork) {
-    return <div>Loading...</div>;
+    return (
+      <div style={{ textAlign: "center", marginTop: "20px" }}>
+        <CircularProgress />
+      </div>
+    );
   }
 
   return (
-    <Card sx={{ maxWidth: 345, margin: 2 }}>
-      <CardMedia
-        component="img"
-        height="250"
-        image={artwork.image}
-        alt={artwork.title}
-      />
+    <Card
+      sx={{
+        maxWidth: 345,
+        margin: 2,
+        transition: "transform 0.3s",
+        "&:hover": {
+          transform: "scale(1.05)",
+        },
+      }}
+    >
+      <CardMedia component="img" height="250" image={artwork.image} alt={artwork.title} />
       <CardContent>
         <Typography variant="h6" component="div">
           {artwork.title}
@@ -35,11 +52,11 @@ const ArtworkCard: React.FC<ArtworkCardProps> = ({ artwork, onFavouriteToggle, i
         <Typography variant="body2" color="text.secondary" sx={{ marginTop: 2 }}>
           {artwork.description || "No description available."}
         </Typography>
-        <Typography variant="body2" color="text.secondary" sx={{ marginTop: 2 }}>
-          {artwork.id || "No description available."}
-        </Typography>
       </CardContent>
-      <IconButton onClick={() => onFavouriteToggle(artwork)} aria-label="add to favorites">
+      <IconButton
+        onClick={() => onFavouriteToggle(artwork)}
+        aria-label={isFavourite ? "remove from favorites" : "add to favorites"}
+      >
         {isFavourite ? <FavoriteIcon /> : <FavoriteBorderIcon />}
       </IconButton>
     </Card>
@@ -47,5 +64,6 @@ const ArtworkCard: React.FC<ArtworkCardProps> = ({ artwork, onFavouriteToggle, i
 };
 
 export default ArtworkCard;
+
 
 

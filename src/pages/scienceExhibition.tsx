@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { fetchSearchResults } from "../api/science-api";
-import ArtworkCard from "../components/scienceCard";
+import ArtworkCard from "../components/artworkCard";
 
 const SearchPage: React.FC = () => {
   const [query, setQuery] = useState("");
@@ -8,6 +8,8 @@ const SearchPage: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [favourites, setFavourites] = useState<any[]>([]);
+  const [page, setPage] = useState(1);
+  const pageSize = 10;
 
   const handleFavouriteToggle = (artwork: any) => {
     setFavourites((prevFavourites) => {
@@ -19,22 +21,27 @@ const SearchPage: React.FC = () => {
     });
   };
 
-  const handleSearch = async () => {
+  const handleSearch = useCallback(async () => {
     setLoading(true);
     setError("");
     try {
-      const data = await fetchSearchResults(query);
-      setResults(data.data || []);
+      const data = await fetchSearchResults(query, page, pageSize);
+      console.log("API Response:", data);
+      const sortedResults = (data.data || []).sort(
+        (a: any, b: any) => new Date(b.date).getTime() - new Date(a.date).getTime()
+      );
+      setResults(sortedResults);
     } catch (err) {
       setError("Failed to fetch data. Please try again.");
     } finally {
       setLoading(false);
     }
-  };
+  }, [query, page, pageSize]);
+  
 
   useEffect(() => {
     handleSearch();
-  }, []);
+  }, [handleSearch]);
 
   return (
     <div>
@@ -45,7 +52,7 @@ const SearchPage: React.FC = () => {
         onChange={(e) => setQuery(e.target.value)}
         placeholder="e.g Biology, Computing etc..."
       />
-      <button onClick={handleSearch}>Search</button>
+      <button onClick={() => setPage(1)}>Search</button> {}
 
       {loading && <p>Loading...</p>}
       {error && <p style={{ color: "red" }}>{error}</p>}
@@ -60,8 +67,21 @@ const SearchPage: React.FC = () => {
           />
         ))}
       </div>
+
+      {}
+      <div>
+        <button
+          onClick={() => setPage((prev) => Math.max(prev - 1, 1))}
+          disabled={page === 1}
+        >
+          Previous
+        </button>
+        <span>Page {page}</span>
+        <button onClick={() => setPage((prev) => prev + 1)}>Next</button>
+      </div>
     </div>
   );
 };
 
 export default SearchPage;
+
