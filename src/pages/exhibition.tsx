@@ -3,6 +3,7 @@ import { fetchVandAResults } from "../api/va-api";
 import { RijksArtworkCollection } from "../api/apiMuseum";
 import { ScienceMuseumArtworkCollection } from "../api/apiMuseum";
 import ArtworkCard from "../components/artworkCard";
+import { Box, Button, Typography, Grid, CircularProgress } from '@mui/material';
 
 const ExhibitionPage: React.FC = () => {
   const [currentMuseum, setCurrentMuseum] = useState<"va" | "rijks" | "science">("va");
@@ -11,6 +12,7 @@ const ExhibitionPage: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [favourites, setFavourites] = useState<any[]>([]);
+
   const [page, setPage] = useState(1);
   const pageSize = 10;
 
@@ -24,19 +26,11 @@ const ExhibitionPage: React.FC = () => {
       } else {
         updatedFavourites = [...prevFavourites, artwork];
       }
-  
+
       localStorage.setItem('favourites', JSON.stringify(updatedFavourites));
       return updatedFavourites;
     });
   };
-  
-
-  useEffect(() => {
-    const storedFavourites = localStorage.getItem('favourites');
-    if (storedFavourites) {
-      setFavourites(JSON.parse(storedFavourites));
-    }
-  }, []);
 
   // Fetch data based on the selected museum
   const fetchMuseumData = useCallback(async () => {
@@ -69,12 +63,23 @@ const ExhibitionPage: React.FC = () => {
 
   // Initial fetch and updates on dependencies
   useEffect(() => {
-    fetchMuseumData();
-  }, [fetchMuseumData]);
+    const storedFavourites = localStorage.getItem('favourites');
+    if (storedFavourites) {
+      setFavourites(JSON.parse(storedFavourites));
+    }
+  }, []);
+
+  // Trigger data fetch when current museum, query, or page changes
+  useEffect(() => {
+    setResults([]); // Clear previous results when museum changes
+    setError(""); // Clear error message
+    setLoading(true); // Set loading to true while fetching
+    fetchMuseumData(); // Fetch new data based on selected museum
+  }, [currentMuseum, query, page, fetchMuseumData]);
 
   return (
-    <div>
-      <h1>
+    <div style={{ padding: '20px', backgroundColor: '#f9f9f9' }}>
+      <Typography variant="h4" align="center" gutterBottom>
         Explore the{" "}
         {currentMuseum === "va"
           ? "V&A"
@@ -82,89 +87,112 @@ const ExhibitionPage: React.FC = () => {
           ? "Rijksmuseum"
           : "Science Museum"}{" "}
         Collection!
-      </h1>
+      </Typography>
 
-      {/* Toggle button */}
-      <div style={{ marginBottom: "20px" }}>
-        <button
+      {/* Museum Selection */}
+      <Box sx={{ display: 'flex', justifyContent: 'center', marginBottom: '20px' }}>
+        <Button
+          variant="contained"
           onClick={() => {
             setCurrentMuseum("va");
-            setPage(1);
-            setQuery("");
+            setPage(1); // Reset to page 1 when changing museum
+            setQuery(""); // Clear the search query
           }}
           disabled={currentMuseum === "va"}
+          sx={{ margin: 1 }}
         >
           Victoria & Albert Museum
-        </button>
-        <button
+        </Button>
+        <Button
+          variant="contained"
           onClick={() => {
             setCurrentMuseum("rijks");
             setPage(1);
             setQuery("");
           }}
           disabled={currentMuseum === "rijks"}
+          sx={{ margin: 1 }}
         >
           Rijksmuseum
-        </button>
-        <button
+        </Button>
+        <Button
+          variant="contained"
           onClick={() => {
             setCurrentMuseum("science");
             setPage(1);
             setQuery("");
           }}
           disabled={currentMuseum === "science"}
+          sx={{ margin: 1 }}
         >
           Science Museum
-        </button>
-      </div>
+        </Button>
+      </Box>
 
-      {/* Search input */}
-      <input
-        type="text"
-        value={query}
-        onChange={(e) => setQuery(e.target.value)}
-        placeholder={`Search ${
-          currentMuseum === "va"
-            ? "V&A"
-            : currentMuseum === "rijks"
-            ? "Rijksmuseum"
-            : "Science Museum"
-        } collections...`}
-      />
-      <button onClick={() => setPage(1)}>Search</button>
+      {/* Search Input */}
+      <Box sx={{ display: 'flex', justifyContent: 'center', marginBottom: '20px' }}>
+        <input
+          type="text"
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          placeholder={`Search ${
+            currentMuseum === "va"
+              ? "V&A"
+              : currentMuseum === "rijks"
+              ? "Rijksmuseum"
+              : "Science Museum"
+          } collections...`}
+          style={{
+            padding: '8px',
+            width: '60%',
+            borderRadius: '4px',
+            border: '1px solid #ccc',
+          }}
+        />
+        <Button
+          variant="contained"
+          onClick={() => setPage(1)}
+          sx={{ marginLeft: 2 }}
+        >
+          Search
+        </Button>
+      </Box>
 
-      {/* Loading state */}
-      {loading && <p>Loading...</p>}
+      {/* Loading and Error State */}
+      {loading && <CircularProgress sx={{ display: 'block', margin: '20px auto' }} />}
+      {error && <Typography color="error" align="center">{error}</Typography>}
 
-      {/* Error message */}
-      {error && <p style={{ color: "red" }}>{error}</p>}
-
-      {/* Artwork results */}
-      <div>
+      {/* Artwork Results Grid */}
+      <Grid container spacing={4} justifyContent="center">
         {results.map((item) => (
-          <ArtworkCard
-            key={item.id}
-            artwork={item}
-            onFavouriteToggle={handleFavouriteToggle}
-            isFavourite={favourites.some((fav) => fav.id === item.id)}
-          />
+          <Grid item xs={12} sm={6} md={4} key={item.id}>
+            <ArtworkCard
+              artwork={item}
+              onFavouriteToggle={handleFavouriteToggle}
+              isFavourite={favourites.some((fav) => fav.id === item.id)}
+            />
+          </Grid>
         ))}
-      </div>
+      </Grid>
 
-      {/* Pagination controls */}
-      <div>
-        <button
+      {/* Pagination Controls */}
+      <Box sx={{ display: 'flex', justifyContent: 'center', marginTop: '20px' }}>
+        <Button
           disabled={page === 1}
           onClick={() => setPage((prevPage) => Math.max(prevPage - 1, 1))}
+          sx={{ marginRight: 2 }}
         >
           Previous
-        </button>
-        <button onClick={() => setPage((prevPage) => prevPage + 1)}>
+        </Button>
+        <Button
+          onClick={() => setPage((prevPage) => prevPage + 1)}
+        >
           Next
-        </button>
-      </div>
+        </Button>
+      </Box>
     </div>
   );
 };
 
 export default ExhibitionPage;
+
