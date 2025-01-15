@@ -84,7 +84,7 @@ const parseVAndAData = (item: any): Artwork => {
 const parseScienceMuseumData = (item: any): Artwork => ({
   id: item.id,
   title: item.attributes?.title?.[0]?.value || "Untitled",
-  artist: "Unknown", // Placeholder as artist information isn't provided in the specified paths
+  artist: "Unknown",
   image: item.attributes?.multimedia?.[0]?.["@processed"]?.large?.location || "",
   description: item.attributes?.description?.[0]?.value || "No description available.",
 });
@@ -105,7 +105,7 @@ export const getOneRijksArt = async (id: string): Promise<Artwork> => {
 export const getOneVAndAArt = async (id: string): Promise<Artwork> => {
   try {
     const response = await VAndAAPI.get(`/${id}`);
-    console.log("V&A Single Artwork Data:", response.data.records[0]); // Fix: Added explicit access to the first record
+    console.log("V&A Single Artwork Data:", response.data.records[0]); 
     return parseVAndAData(response.data.records[0]);
   } catch (error) {
     console.error("Error fetching V&A artwork:", error);
@@ -149,7 +149,7 @@ export const VAndAArtworkCollection = async (terms: FetchTerms): Promise<Artwork
 
   try {
     const response = await VAndAAPI.get("/search", { params: queryParams });
-    console.log("V&A Collection Data:", response.data.records); // Fix: Ensure logging works for records
+    console.log("V&A Collection Data:", response.data.records); 
     return response.data.records.map(parseVAndAData);
   } catch (error) {
     console.error("Error fetching V&A collection:", error);

@@ -1,18 +1,14 @@
 import React from 'react';
-import ArtworkCard from '../components/artworkCard'; 
-interface FavouritesPageProps {
-  favourites: any[];
-  onFavouriteToggle: (artwork: any) => void;
-}
+import ArtworkCard from '../components/artworkCard';
 
-const FavouritesPage: React.FC<FavouritesPageProps> = ({ favourites, onFavouriteToggle }) => {
+const FavouritesPage: React.FC<{ favourites: any[], onFavouriteToggle: (artwork: any) => void }> = ({ favourites, onFavouriteToggle }) => {
   return (
     <div>
-      <h1>Favourites</h1>
+      <h1>Your Favourites</h1>
       {favourites.length === 0 ? (
-        <p>You have no favourite artworks yet.</p>
+        <p>No favourites added yet!</p>
       ) : (
-        <div className="artwork-grid">
+        <div>
           {favourites.map((artwork) => (
             <ArtworkCard
               key={artwork.id}
@@ -28,3 +24,7 @@ const FavouritesPage: React.FC<FavouritesPageProps> = ({ favourites, onFavourite
 };
 
 export default FavouritesPage;
+
+
+
+

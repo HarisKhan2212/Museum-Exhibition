@@ -17,13 +17,26 @@ const ExhibitionPage: React.FC = () => {
   // Handle favourite toggle
   const handleFavouriteToggle = (artwork: any) => {
     setFavourites((prevFavourites) => {
-      if (prevFavourites.some((fav) => fav.id === artwork.id)) {
-        return prevFavourites.filter((fav) => fav.id !== artwork.id);
+      const isFavourite = prevFavourites.some((fav) => fav.id === artwork.id);
+      let updatedFavourites;
+      if (isFavourite) {
+        updatedFavourites = prevFavourites.filter((fav) => fav.id !== artwork.id);
       } else {
-        return [...prevFavourites, artwork];
+        updatedFavourites = [...prevFavourites, artwork];
       }
+  
+      localStorage.setItem('favourites', JSON.stringify(updatedFavourites));
+      return updatedFavourites;
     });
   };
+  
+
+  useEffect(() => {
+    const storedFavourites = localStorage.getItem('favourites');
+    if (storedFavourites) {
+      setFavourites(JSON.parse(storedFavourites));
+    }
+  }, []);
 
   // Fetch data based on the selected museum
   const fetchMuseumData = useCallback(async () => {
@@ -76,8 +89,8 @@ const ExhibitionPage: React.FC = () => {
         <button
           onClick={() => {
             setCurrentMuseum("va");
-            setPage(1); // Reset pagination
-            setQuery(""); // Clear search query
+            setPage(1);
+            setQuery("");
           }}
           disabled={currentMuseum === "va"}
         >
@@ -86,8 +99,8 @@ const ExhibitionPage: React.FC = () => {
         <button
           onClick={() => {
             setCurrentMuseum("rijks");
-            setPage(1); // Reset pagination
-            setQuery(""); // Clear search query
+            setPage(1);
+            setQuery("");
           }}
           disabled={currentMuseum === "rijks"}
         >
@@ -96,8 +109,8 @@ const ExhibitionPage: React.FC = () => {
         <button
           onClick={() => {
             setCurrentMuseum("science");
-            setPage(1); // Reset pagination
-            setQuery(""); // Clear search query
+            setPage(1);
+            setQuery("");
           }}
           disabled={currentMuseum === "science"}
         >

@@ -13,16 +13,26 @@ import ExhibitionPage from './pages/exhibition';
 
 const App: React.FC = () => {
   const [artwork, setArtwork] = useState<any | null>(null);
-  const [favourites, setFavourites] = useState<any[]>([]);
+  const [favourites, setFavourites] = useState<any[]>(() => {
+    const storedFavourites = localStorage.getItem('favourites');
+    return storedFavourites ? JSON.parse(storedFavourites) : [];
+  });
   const [loading, setLoading] = useState(false);
 
   const handleFavouriteToggle = (artwork: any) => {
     setFavourites((prevFavourites) => {
-      if (prevFavourites.some((fav) => fav.id === artwork.id)) {
-        return prevFavourites.filter((fav) => fav.id !== artwork.id);
+      let updatedFavourites = [...prevFavourites];
+      const found = updatedFavourites.some((fav) => fav.id === artwork.id);
+      if (found) {
+        updatedFavourites = updatedFavourites.filter((fav) => fav.id !== artwork.id);
       } else {
-        return [...prevFavourites, artwork];
+        updatedFavourites.push(artwork);
       }
+      
+      // Update localStorage whenever favourites change
+      localStorage.setItem('favourites', JSON.stringify(updatedFavourites));
+      
+      return updatedFavourites;
     });
   };
 
@@ -47,44 +57,40 @@ const App: React.FC = () => {
   }, [artworkId]);
 
   return (
-    <FavouritesProvider>
-      <Router>
-        <div>
-          <Link to="/">Home</Link>
-          <Link to="/">Login</Link>
-          {/* <Link to="/rijk">The Rijksmuseum</Link> */}
-          <Link to="Exhibition">exhibiton</Link>
-          {/* <Link to="/va">The V&A Museum</Link>  {} */}
-          <Link to="/favourites">Favourites</Link>
-          <Routes>
+    <Router>
+      <div>
+        <Link to="/">Home</Link>
+        <Link to="/">Login</Link>
+        <Link to="Exhibition">Exhibition</Link>
+        <Link to="/favourites">Favourites</Link>
+        <Routes>
           <Route path="/exhibition" element={<ExhibitionPage />} />
-            <Route path="/" element={<Home />} />
-            <Route path="/rijk" element={<RijksmuseumPage />} />
-            <Route path="/rijk/:artworkId" element={
-              <ArtworkCard
-                artwork={artwork}
-                onFavouriteToggle={handleFavouriteToggle}
-                isFavourite={favourites.some((fav) => fav.id === artwork?.id)}
-              />
-            } />
-            <Route path="/va" element={<VAndAPage />} />  {}
-            <Route path="/va/:artworkId" element={
-              <ArtworkCard
-                artwork={artwork}
-                onFavouriteToggle={handleFavouriteToggle}
-                isFavourite={favourites.some((fav) => fav.id === artwork?.id)}
-              />
-            } />
-            <Route path="/favourites" element={
-              <FavouritesPage
-                favourites={favourites}
-                onFavouriteToggle={handleFavouriteToggle}
-              />
-            } />
-          </Routes>
-        </div>
-      </Router>
-    </FavouritesProvider>
+          <Route path="/" element={<Home />} />
+          <Route path="/rijk" element={<RijksmuseumPage />} />
+          <Route path="/rijk/:artworkId" element={
+            <ArtworkCard
+              artwork={artwork}
+              onFavouriteToggle={handleFavouriteToggle}
+              isFavourite={favourites.some((fav) => fav.id === artwork?.id)}
+            />
+          } />
+          <Route path="/va" element={<VAndAPage />} />
+          <Route path="/va/:artworkId" element={
+            <ArtworkCard
+              artwork={artwork}
+              onFavouriteToggle={handleFavouriteToggle}
+              isFavourite={favourites.some((fav) => fav.id === artwork?.id)}
+            />
+          } />
+          <Route path="/favourites" element={
+            <FavouritesPage
+              favourites={favourites}
+              onFavouriteToggle={handleFavouriteToggle}
+            />
+          } />
+        </Routes>
+      </div>
+    </Router>
   );
 };
 
