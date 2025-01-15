@@ -83,15 +83,18 @@ const VAndAPage: React.FC = () => {
       {error && <p style={{ color: "red" }}>{error}</p>}
 
       <div>
-        {/* Render artwork cards */}
-        {results.map((item) => (
-          <ArtworkCard
-            key={item.id}
-            artwork={item}
-            onFavouriteToggle={handleFavouriteToggle}
-            isFavourite={favourites.some((fav) => fav.id === item.id)}
-          />
-        ))}
+      {results.map((item) => {
+  console.log("Artwork item:", item); // Log each artwork object
+  return (
+    <ArtworkCard
+      key={item.id}
+      artwork={item}
+      onFavouriteToggle={handleFavouriteToggle}
+      isFavourite={favourites.some((fav) => fav.id === item.id)}
+    />
+  );
+})}
+
       </div>
 
       <div>

@@ -9,6 +9,7 @@ import VAndAPage from './pages/vaPage';
 import FavouritesPage from './pages/favourites';
 import { FavouritesProvider } from './components/favourtiesContext';
 import { fetchObjectById } from './api/science-api';
+import ExhibitionPage from './pages/exhibition';
 
 const App: React.FC = () => {
   const [artwork, setArtwork] = useState<any | null>(null);
@@ -50,11 +51,13 @@ const App: React.FC = () => {
       <Router>
         <div>
           <Link to="/">Home</Link>
-          <Login />
-          <Link to="/rijk">The Rijksmuseum</Link>
-          <Link to="/va">The V&A Museum</Link>  {}
+          <Link to="/">Login</Link>
+          {/* <Link to="/rijk">The Rijksmuseum</Link> */}
+          <Link to="Exhibition">exhibiton</Link>
+          {/* <Link to="/va">The V&A Museum</Link>  {} */}
           <Link to="/favourites">Favourites</Link>
           <Routes>
+          <Route path="/exhibition" element={<ExhibitionPage />} />
             <Route path="/" element={<Home />} />
             <Route path="/rijk" element={<RijksmuseumPage />} />
             <Route path="/rijk/:artworkId" element={
