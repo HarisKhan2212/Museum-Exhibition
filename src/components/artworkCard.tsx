@@ -1,10 +1,9 @@
-// ArtworkCard.tsx
 import React from "react";
-import { Card, CardMedia, CardContent, Typography, IconButton, CircularProgress } from "@mui/material";
+import { Card, CardMedia, CardContent, Typography, IconButton } from "@mui/material";
 import FavoriteIcon from "@mui/icons-material/Favorite";
 import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
 
-// Updated Artwork interface
+// Artwork interface
 interface Artwork {
   id: string;
   image: string;
@@ -12,7 +11,7 @@ interface Artwork {
   artist?: string;
   type?: string;
   description?: string;
-  museum: string;  // Add museum property here
+  museum: string; 
 }
 
 interface ArtworkCardProps {
@@ -25,7 +24,7 @@ const ArtworkCard: React.FC<ArtworkCardProps> = ({ artwork, onFavouriteToggle, i
   if (!artwork) {
     return (
       <div style={{ textAlign: "center", marginTop: "20px" }}>
-        <CircularProgress />
+        Loading...
       </div>
     );
   }
@@ -38,12 +37,6 @@ const ArtworkCard: React.FC<ArtworkCardProps> = ({ artwork, onFavouriteToggle, i
           {artwork.title}
         </Typography>
         <Typography variant="body2" color="text.secondary">
-          Artist: {artwork.artist || "Unknown Artist"}
-        </Typography>
-        <Typography variant="body2" color="text.secondary" sx={{ marginTop: 2 }}>
-          Type: {artwork.type || "Unknown Type"}
-        </Typography>
-        <Typography variant="body2" color="text.secondary" sx={{ marginTop: 2 }}>
           {artwork.description || "No description available."}
         </Typography>
       </CardContent>
@@ -55,6 +48,7 @@ const ArtworkCard: React.FC<ArtworkCardProps> = ({ artwork, onFavouriteToggle, i
 };
 
 export default ArtworkCard;
+
 
 
 

@@ -1,12 +1,11 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { fetchVandAResults } from "../api/va-api";
-import { RijksArtworkCollection } from "../api/apiMuseum";
+import { VAndAArtworkCollection } from "../api/apiMuseum";
 import { ScienceMuseumArtworkCollection } from "../api/apiMuseum";
 import ArtworkCard from "../components/artworkCard";
-import { Box, Button, Typography, Grid, CircularProgress } from '@mui/material';
+import { Box, Button, Typography, Grid, CircularProgress } from "@mui/material";
 
 const ExhibitionPage: React.FC = () => {
-  const [currentMuseum, setCurrentMuseum] = useState<"va" | "rijks" | "science">("va");
+  const [currentMuseum, setCurrentMuseum] = useState<"va" | "science">("va");
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
@@ -27,7 +26,7 @@ const ExhibitionPage: React.FC = () => {
         updatedFavourites = [...prevFavourites, artwork];
       }
 
-      localStorage.setItem('favourites', JSON.stringify(updatedFavourites));
+      localStorage.setItem("favourites", JSON.stringify(updatedFavourites));
       return updatedFavourites;
     });
   };
@@ -39,9 +38,7 @@ const ExhibitionPage: React.FC = () => {
     try {
       let data;
       if (currentMuseum === "va") {
-        data = await fetchVandAResults(query, page, pageSize);
-      } else if (currentMuseum === "rijks") {
-        data = await RijksArtworkCollection({ type: query, page });
+        data = await VAndAArtworkCollection({ type: query, page });
       } else {
         data = await ScienceMuseumArtworkCollection({ type: query, page });
       }
@@ -49,11 +46,7 @@ const ExhibitionPage: React.FC = () => {
     } catch (err) {
       setError(
         `Failed to fetch data from ${
-          currentMuseum === "va"
-            ? "V&A"
-            : currentMuseum === "rijks"
-            ? "Rijksmuseum"
-            : "Science Museum"
+          currentMuseum === "va" ? "V&A" : "Science Museum"
         }. Please try again.`
       );
     } finally {
@@ -63,7 +56,7 @@ const ExhibitionPage: React.FC = () => {
 
   // Initial fetch and updates on dependencies
   useEffect(() => {
-    const storedFavourites = localStorage.getItem('favourites');
+    const storedFavourites = localStorage.getItem("favourites");
     if (storedFavourites) {
       setFavourites(JSON.parse(storedFavourites));
     }
@@ -71,49 +64,32 @@ const ExhibitionPage: React.FC = () => {
 
   // Trigger data fetch when current museum, query, or page changes
   useEffect(() => {
-    setResults([]); // Clear previous results when museum changes
-    setError(""); // Clear error message
-    setLoading(true); // Set loading to true while fetching
-    fetchMuseumData(); // Fetch new data based on selected museum
+    setResults([]);
+    setError("");
+    setLoading(true);
+    fetchMuseumData();
   }, [currentMuseum, query, page, fetchMuseumData]);
 
   return (
-    <div style={{ padding: '20px', backgroundColor: '#f9f9f9' }}>
+    <div style={{ padding: "20px", backgroundColor: "#f9f9f9" }}>
       <Typography variant="h4" align="center" gutterBottom>
         Explore the{" "}
-        {currentMuseum === "va"
-          ? "V&A"
-          : currentMuseum === "rijks"
-          ? "Rijksmuseum"
-          : "Science Museum"}{" "}
-        Collection!
+        {currentMuseum === "va" ? "V&A" : "Science Museum"} Collection!
       </Typography>
 
       {/* Museum Selection */}
-      <Box sx={{ display: 'flex', justifyContent: 'center', marginBottom: '20px' }}>
+      <Box sx={{ display: "flex", justifyContent: "center", marginBottom: "20px" }}>
         <Button
           variant="contained"
           onClick={() => {
             setCurrentMuseum("va");
-            setPage(1); // Reset to page 1 when changing museum
-            setQuery(""); // Clear the search query
+            setPage(1);
+            setQuery("");
           }}
           disabled={currentMuseum === "va"}
           sx={{ margin: 1 }}
         >
           Victoria & Albert Museum
-        </Button>
-        <Button
-          variant="contained"
-          onClick={() => {
-            setCurrentMuseum("rijks");
-            setPage(1);
-            setQuery("");
-          }}
-          disabled={currentMuseum === "rijks"}
-          sx={{ margin: 1 }}
-        >
-          Rijksmuseum
         </Button>
         <Button
           variant="contained"
@@ -130,23 +106,19 @@ const ExhibitionPage: React.FC = () => {
       </Box>
 
       {/* Search Input */}
-      <Box sx={{ display: 'flex', justifyContent: 'center', marginBottom: '20px' }}>
+      <Box sx={{ display: "flex", justifyContent: "center", marginBottom: "20px" }}>
         <input
           type="text"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           placeholder={`Search ${
-            currentMuseum === "va"
-              ? "V&A"
-              : currentMuseum === "rijks"
-              ? "Rijksmuseum"
-              : "Science Museum"
+            currentMuseum === "va" ? "V&A" : "Science Museum"
           } collections...`}
           style={{
-            padding: '8px',
-            width: '60%',
-            borderRadius: '4px',
-            border: '1px solid #ccc',
+            padding: "8px",
+            width: "60%",
+            borderRadius: "4px",
+            border: "1px solid #ccc",
           }}
         />
         <Button
@@ -159,7 +131,7 @@ const ExhibitionPage: React.FC = () => {
       </Box>
 
       {/* Loading and Error State */}
-      {loading && <CircularProgress sx={{ display: 'block', margin: '20px auto' }} />}
+      {loading && <CircularProgress sx={{ display: "block", margin: "20px auto" }} />}
       {error && <Typography color="error" align="center">{error}</Typography>}
 
       {/* Artwork Results Grid */}
@@ -176,7 +148,7 @@ const ExhibitionPage: React.FC = () => {
       </Grid>
 
       {/* Pagination Controls */}
-      <Box sx={{ display: 'flex', justifyContent: 'center', marginTop: '20px' }}>
+      <Box sx={{ display: "flex", justifyContent: "center", marginTop: "20px" }}>
         <Button
           disabled={page === 1}
           onClick={() => setPage((prevPage) => Math.max(prevPage - 1, 1))}
@@ -195,4 +167,3 @@ const ExhibitionPage: React.FC = () => {
 };
 
 export default ExhibitionPage;
-

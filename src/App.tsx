@@ -1,12 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import './App.css';
 import { BrowserRouter as Router, Routes, Route, Link, useParams } from 'react-router-dom';
-import { Button, Box, Typography } from '@mui/material'; // Import MUI components for styling
+import { Button, Box, Typography } from '@mui/material';
 import Home from './pages/home';
-import Login from './components/login';
 import ArtworkCard from './components/artworkCard';
-import RijksmuseumPage from './pages/rijkPage';
-import VAndAPage from './pages/vaPage';
 import FavouritesPage from './pages/favourites';
 import { fetchObjectById } from './api/science-api';
 import ExhibitionPage from './pages/exhibition';
@@ -76,7 +73,6 @@ const App: React.FC = () => {
         <Routes>
           <Route path="/exhibition" element={<ExhibitionPage />} />
           <Route path="/" element={<Home />} />
-          <Route path="/rijk" element={<RijksmuseumPage />} />
           <Route path="/rijk/:artworkId" element={
             <ArtworkCard
               artwork={artwork}
@@ -84,7 +80,6 @@ const App: React.FC = () => {
               isFavourite={favourites.some((fav) => fav.id === artwork?.id)}
             />
           } />
-          <Route path="/va" element={<VAndAPage />} />
           <Route path="/va/:artworkId" element={
             <ArtworkCard
               artwork={artwork}
@@ -98,6 +93,7 @@ const App: React.FC = () => {
               onFavouriteToggle={handleFavouriteToggle}
             />
           } />
+          
         </Routes>
       </div>
     </Router>
