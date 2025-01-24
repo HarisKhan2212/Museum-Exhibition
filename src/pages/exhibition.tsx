@@ -1,11 +1,11 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { VAndAArtworkCollection } from "../api/apiMuseum";
-import { ScienceMuseumArtworkCollection } from "../api/apiMuseum";
+import { clevelandArtworkCollection } from "../api/cle-api";
+import { ScienceMuseumArtworkCollection } from "../api/science-api";
 import ArtworkCard from "../components/artworkCard";
 import { Box, Button, Typography, Grid, CircularProgress } from "@mui/material";
 
 const ExhibitionPage: React.FC = () => {
-  const [currentMuseum, setCurrentMuseum] = useState<"va" | "science">("va");
+  const [currentMuseum, setCurrentMuseum] = useState<"cleveland" | "science">("cleveland");
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
@@ -13,15 +13,15 @@ const ExhibitionPage: React.FC = () => {
   const [favourites, setFavourites] = useState<any[]>([]);
 
   const [page, setPage] = useState(1);
-  const pageSize = 10;
+  const pageSize = 12;
 
   // Handle favourite toggle
   const handleFavouriteToggle = (artwork: any) => {
     setFavourites((prevFavourites) => {
-      const isFavourite = prevFavourites.some((fav) => fav.id === artwork.id);
+      const isFavourite = prevFavourites.some((fav) => fav.uniqueKey === artwork.uniqueKey);
       let updatedFavourites;
       if (isFavourite) {
-        updatedFavourites = prevFavourites.filter((fav) => fav.id !== artwork.id);
+        updatedFavourites = prevFavourites.filter((fav) => fav.uniqueKey !== artwork.uniqueKey);
       } else {
         updatedFavourites = [...prevFavourites, artwork];
       }
@@ -37,16 +37,23 @@ const ExhibitionPage: React.FC = () => {
     setError("");
     try {
       let data;
-      if (currentMuseum === "va") {
-        data = await VAndAArtworkCollection({ type: query, page });
+      if (currentMuseum === "cleveland") {
+        data = await clevelandArtworkCollection({ type: query, page, pageSize });
       } else {
         data = await ScienceMuseumArtworkCollection({ type: query, page });
       }
-      setResults(data || []);
+
+      // Add a `uniqueKey` to each artwork for identification
+      const processedData = data.map((item: any, index: number) => ({
+        ...item,
+        uniqueKey: `${currentMuseum}-${item.id || index}`, // Use `id` or fallback to index
+      }));
+
+      setResults(processedData || []);
     } catch (err) {
       setError(
         `Failed to fetch data from ${
-          currentMuseum === "va" ? "V&A" : "Science Museum"
+          currentMuseum === "cleveland" ? "Cleveland Museum of Art" : "Science Museum"
         }. Please try again.`
       );
     } finally {
@@ -74,7 +81,7 @@ const ExhibitionPage: React.FC = () => {
     <div style={{ padding: "20px", backgroundColor: "#f9f9f9" }}>
       <Typography variant="h4" align="center" gutterBottom>
         Explore the{" "}
-        {currentMuseum === "va" ? "V&A" : "Science Museum"} Collection!
+        {currentMuseum === "cleveland" ? "Cleveland Museum of Art" : "Science Museum"} Collection!
       </Typography>
 
       {/* Museum Selection */}
@@ -82,14 +89,14 @@ const ExhibitionPage: React.FC = () => {
         <Button
           variant="contained"
           onClick={() => {
-            setCurrentMuseum("va");
+            setCurrentMuseum("cleveland");
             setPage(1);
             setQuery("");
           }}
-          disabled={currentMuseum === "va"}
+          disabled={currentMuseum === "cleveland"}
           sx={{ margin: 1 }}
         >
-          Victoria & Albert Museum
+          Cleveland Museum of Art
         </Button>
         <Button
           variant="contained"
@@ -112,7 +119,7 @@ const ExhibitionPage: React.FC = () => {
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           placeholder={`Search ${
-            currentMuseum === "va" ? "V&A" : "Science Museum"
+            currentMuseum === "cleveland" ? "Cleveland Museum of Art" : "Science Museum"
           } collections...`}
           style={{
             padding: "8px",
@@ -137,11 +144,11 @@ const ExhibitionPage: React.FC = () => {
       {/* Artwork Results Grid */}
       <Grid container spacing={4} justifyContent="center">
         {results.map((item) => (
-          <Grid item xs={12} sm={6} md={4} key={item.id}>
+          <Grid item xs={12} sm={6} md={4} key={item.uniqueKey}>
             <ArtworkCard
               artwork={item}
               onFavouriteToggle={handleFavouriteToggle}
-              isFavourite={favourites.some((fav) => fav.id === item.id)}
+              isFavourite={favourites.some((fav) => fav.uniqueKey === item.uniqueKey)}
             />
           </Grid>
         ))}

@@ -33,6 +33,12 @@ const App: React.FC = () => {
     });
   };
 
+  // Function to refresh favourites from localStorage
+  const refreshFavourites = () => {
+    const storedFavourites = localStorage.getItem('favourites');
+    setFavourites(storedFavourites ? JSON.parse(storedFavourites) : []);
+  };
+
   const { artworkId } = useParams<{ artworkId: string }>();
 
   useEffect(() => {
@@ -57,12 +63,9 @@ const App: React.FC = () => {
     <Router>
       <div>
         <Box sx={{ padding: '16px', textAlign: 'center' }}>
-          {/* Add Typography for page title */}
           <Typography variant="h4" sx={{ marginBottom: '16px' }}>Art Gallery</Typography>
           
-          {/* Create a row of buttons using MUI Box for layout */}
           <Box sx={{ display: 'flex', justifyContent: 'center', gap: 2 }}>
-            {/* Style Links as Buttons */}
             <Button variant="contained" color="primary" component={Link} to="/">Home</Button>
             <Button variant="contained" color="primary" component={Link} to="/login">Login</Button>
             <Button variant="contained" color="primary" component={Link} to="/exhibition">Exhibition</Button>
@@ -91,9 +94,9 @@ const App: React.FC = () => {
             <FavouritesPage
               favourites={favourites}
               onFavouriteToggle={handleFavouriteToggle}
+              refreshFavourites={refreshFavourites} // Pass the new prop here
             />
           } />
-          
         </Routes>
       </div>
     </Router>
@@ -101,4 +104,3 @@ const App: React.FC = () => {
 };
 
 export default App;
-

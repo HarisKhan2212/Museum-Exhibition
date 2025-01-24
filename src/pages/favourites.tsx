@@ -1,7 +1,17 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import ArtworkCard from '../components/artworkCard';
 
-const FavouritesPage: React.FC<{ favourites: any[], onFavouriteToggle: (artwork: any) => void }> = ({ favourites, onFavouriteToggle }) => {
+const FavouritesPage: React.FC<{ 
+  favourites: any[], 
+  onFavouriteToggle: (artwork: any) => void, 
+  refreshFavourites: () => void 
+}> = ({ favourites, onFavouriteToggle, refreshFavourites }) => {
+  
+  // Refresh favourites whenever the page is mounted
+  useEffect(() => {
+    refreshFavourites();
+  }, [refreshFavourites]);
+
   return (
     <div>
       <h1>Your Favourites</h1>
@@ -24,6 +34,7 @@ const FavouritesPage: React.FC<{ favourites: any[], onFavouriteToggle: (artwork:
 };
 
 export default FavouritesPage;
+
 
 
 

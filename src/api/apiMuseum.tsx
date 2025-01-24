@@ -1,6 +1,6 @@
 import axios from "axios";
 
-// Base API clients
+// Base API client for V&A
 const VAndAAPI = axios.create({
   baseURL: "https://api.vam.ac.uk/v2/objects",
   headers: {
@@ -9,16 +9,8 @@ const VAndAAPI = axios.create({
   },
 });
 
-const ScienceMuseumAPI = axios.create({
-  baseURL: "https://collection.sciencemuseumgroup.org.uk",
-  headers: {
-    Accept: "application/json",
-    "User-Agent": "ExhibitionCurationPlatform/1.0",
-  },
-});
-
 // Interfaces
-interface Artwork {
+export interface Artwork {
   id: string;
   title: string;
   artist: string;
@@ -31,52 +23,119 @@ interface Artwork {
   fullImageUrls?: string[];
 }
 
-interface FetchTerms {
+export interface FetchTerms {
   type?: string;
   page?: number;
   selectedMuseums?: string[];
 }
 
+// Utility: Extract image URLs
+export const getImageUrls = (artwork: any): string[] => {
+  const imageUrls: string[] = [];
+  if (artwork.images?.web) {
+    imageUrls.push(artwork.images.web.url);
+  }
+  if (artwork.alternate_images) {
+    artwork.alternate_images.forEach((image: any) => {
+      if (image.web) {
+        imageUrls.push(image.web.url);
+      }
+    });
+  }
+  return imageUrls;
+};
+
+// Utility: Get full-size image URLs
+export const getFullImage = (artwork: any): string[] => {
+  const imageUrls: string[] = [];
+  if (artwork.images && artwork.images.length > 0) {
+    artwork.images.forEach((imgId: string) => {
+      imageUrls.push(
+        `https://framemark.vam.ac.uk/collections/${imgId}/full/full/0/default.jpg`
+      );
+    });
+  } else if (artwork._primaryImageId) {
+    imageUrls.push(
+      `https://framemark.vam.ac.uk/collections/${artwork._primaryImageId}/full/full/0/default.jpg`
+    );
+  }
+  return imageUrls;
+};
+
+// Utility: Truncate title
+export const truncateTitle = (title: string, maxLength: number): string => {
+  return title.length > maxLength
+    ? title.substring(0, maxLength) + "..."
+    : title;
+};
+
+// Utility: Reduce collections
+export const reduceCollections = (collectionArray: any[]): any[] => {
+  return collectionArray.map((item) => {
+    if (item.collection_type === "two") {
+      const { id, title, images, technique, creation_date } = item.artwork;
+
+      return {
+        ...item,
+        artwork: {
+          id,
+          title,
+          images: images || [],
+          technique,
+          creation_date,
+        },
+      };
+    }
+    if (item.collection_type === "one") {
+      const {
+        systemNumber,
+        _primaryTitle,
+        objectType,
+        _primaryDate,
+        _primaryImageId,
+        _images,
+        images,
+        productionDates,
+        titles,
+      } = item.artwork;
+
+      return {
+        ...item,
+        artwork: {
+          systemNumber,
+          _primaryTitle: _primaryTitle || titles?.[0]?.title || "Unknown Title",
+          objectType,
+          _primaryDate:
+            _primaryDate || productionDates?.[0]?.date.text || "Unknown Date",
+          _primaryImageId: _primaryImageId || images?.[0] || null,
+          _images: _images || null,
+        },
+      };
+    }
+
+    return item;
+  });
+};
+
 // Parsing function for V&A data
 export const parsingVAData = (art: any): Artwork => {
+  const title = art.titles?.[0]?.title || art._primaryTitle || "Untitled";
+  const description = art.summaryDescription || "No description available.";
+  const creator = art._primaryMaker?.name || "Unknown";
+  const image =
+    art._primaryImageId
+      ? `https://framemark.vam.ac.uk/collections/${art._primaryImageId}/full/full/0/default.jpg`
+      : "https://via.placeholder.com/600x400?text=No+Image";
 
-  const onDisplay = art.onDisplay ? 'This piece is displayed in the V & A now' : 'This piece is in storage';
-
-  const creator = art._primaryMaker?.name || 'Unknown';
-
-  const dated = art._primaryDate.length === 0 ? 'Unknown' : art._primaryDate;
-
-  const numbers: number[] = [];
-  const foundNumbers = art._primaryDate.match(/-?\d+/g);
-  
-  if (foundNumbers) {
-    numbers.push(...foundNumbers.map(Number));
-  }
-
-  const foundBC = art._primaryDate.match(/\bbc\b/gi);
-  let sortedDate = numbers.length > 0 ? numbers[0] : undefined; 
-  if (foundBC && sortedDate !== undefined) {
-    sortedDate = -sortedDate;
-  }
-
-  // Extract the title from the API response
-  const title = art.titles?.[0]?.title || 'Untitled';
-
-  // Extract the summary description from the API response
-  const description = art.summaryDescription || 'No description available.';
-
-  // Return parsed artwork object
   return {
-    id: art.systemNumber || 'Unknown',
+    id: art.systemNumber || "Unknown",
+    title,
     artist: creator,
-    onDisplay: onDisplay,
-    title: title,  // Use the dynamically extracted title
-    image: `https://framemark.vam.ac.uk/collections/${art._primaryImageId}/full/600,400/0/default.jpg`,
-    description: description,  // Use the dynamically extracted description
-    creationDate: dated,
-    sortableDate: sortedDate,
+    description,
+    image,
   };
 };
+
 
 // Fetch single V&A artwork
 export const getOneVAndAArt = async (id: string): Promise<Artwork> => {
@@ -88,7 +147,6 @@ export const getOneVAndAArt = async (id: string): Promise<Artwork> => {
       throw new Error("No valid record found for this V&A item.");
     }
 
-    // Parse the V&A artwork using the parsing function
     return parsingVAData(artData);
   } catch (error) {
     console.error("Error fetching V&A artwork:", error);
@@ -97,7 +155,9 @@ export const getOneVAndAArt = async (id: string): Promise<Artwork> => {
 };
 
 // Fetch V&A artwork collection
-export const VAndAArtworkCollection = async (terms: { type?: string; page?: number }): Promise<Artwork[]> => {
+export const VAndAArtworkCollection = async (
+  terms: FetchTerms
+): Promise<Artwork[]> => {
   const queryParams = {
     page: terms.page || 1,
     page_size: 10,
@@ -112,65 +172,9 @@ export const VAndAArtworkCollection = async (terms: { type?: string; page?: numb
       throw new Error("No records found in the V&A collection.");
     }
 
-    // Parse each V&A artwork in the collection
     return artworks.map(parsingVAData);
   } catch (error) {
     console.error("Error fetching V&A collection:", error);
-    throw error;
-  }
-};
-
-// Fetch single Science Museum artwork
-export const getOneScienceMuseumArt = async (id: string): Promise<Artwork> => {
-  try {
-    const response = await ScienceMuseumAPI.get(`/objects/${id}`);
-    return parseScienceMuseumData(response.data.data);
-  } catch (error) {
-    console.error("Error fetching Science Museum artwork:", error);
-    throw error;
-  }
-};
-
-// Helper function to parse Science Museum data
-const parseScienceMuseumData = (item: any): Artwork => {
-  if (!item || !item.id) {
-    console.error("Invalid Science Museum item:", item);
-    return {
-      id: "Unknown",
-      title: "Untitled",
-      artist: "Unknown",
-      image: "https://via.placeholder.com/600x400?text=No+Image",
-      description: "No description available.",
-    };
-  }
-
-  const imagePath = item.attributes?.multimedia?.[0]?.["@processed"]?.medium?.location;
-  
-  return {
-    id: item.id,
-    title: item.attributes?.title?.[0]?.value || "Untitled",
-    artist: "Unknown",  // Artist info might be missing
-    image: imagePath
-      ? `https://coimages.sciencemuseumgroup.org.uk/${imagePath}`
-      : "https://via.placeholder.com/600x400?text=No+Image",
-    description: item.attributes?.description?.[0]?.value || "No description available.",
-  };
-};
-
-// Fetch Science Museum artwork collection
-export const ScienceMuseumArtworkCollection = async (terms: FetchTerms): Promise<Artwork[]> => {
-  const queryParams = {
-    q: terms.type || "",
-    "page[number]": terms.page || 1,
-    "page[size]": 10,
-    sort: "-date",
-  };
-
-  try {
-    const response = await ScienceMuseumAPI.get("/search", { params: queryParams });
-    return response.data.data.map(parseScienceMuseumData);
-  } catch (error) {
-    console.error("Error fetching Science Museum collection:", error);
     throw error;
   }
 };
