@@ -1,6 +1,5 @@
-// All imports should be at the top
 import axios, { AxiosResponse } from 'axios';
-import React, { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 
 // Define types for the Cleveland Museum artwork data
 interface Creator {
@@ -8,19 +7,13 @@ interface Creator {
 }
 
 interface Artwork {
-  exhibitions: {
-    current: any[];
-  };
+  exhibitions: { current: any[] };
   creators: Creator[];
   type: string;
   title: string;
   creation_date: string;
   description: string;
-  images: {
-    web: {
-      url: string;
-    };
-  };
+  images: { web: { url: string } };
   accession_number: string;
   sortable_date: string;
 }
@@ -39,11 +32,12 @@ interface ArtworkParsed {
   sortableDate: string;
 }
 
-interface QueryTerms {
+// Interface for FetchTerms (standardized across APIs)
+interface FetchTerms {
   type?: string;
   query?: string;
   page?: number;
-  pageSize?: number; 
+  pageSize?: number;
 }
 
 // Cleveland Museum API setup
@@ -61,10 +55,10 @@ export const parsingClevData = (art: Artwork): ArtworkParsed => {
 
   return {
     isClev: true,
-    onDisplay: onDisplay,
+    onDisplay,
     type: art.type,
     title: art.title,
-    creator: creator,
+    creator,
     creationDate: art.creation_date,
     description: art.description,
     image: art.images.web.url,
@@ -74,29 +68,9 @@ export const parsingClevData = (art: Artwork): ArtworkParsed => {
   };
 };
 
-// Fetch a single artwork by ID
-export const getOneClevArt = (id: string): Promise<ArtworkParsed> => {
-  return clevAPI.get(`${id}`)
-    .then((response: AxiosResponse<{ data: Artwork }>) => {
-      console.log(response.data.data);
-      return parsingClevData(response.data.data);
-    })
-    .catch((error) => {
-      console.error('Error fetching Cleveland artwork:', error);
-      throw error;
-    });
-};
-
-// Fetch a collection of artworks
-export const clevelandArtworkCollection = async (terms: QueryTerms): Promise<ArtworkParsed[]> => {
-  const { query, page = 1 } = terms;
-  const pageSize = 20;
-  
-  let queryString = `?has_image=1&page=${page}&limit=${pageSize}`;
-
-  if (query) {
-    queryString += `&q=${query}`;
-  }
+// Fetch Cleveland Museum artwork collection
+export const clevelandArtworkCollection = async ({ query, page = 1, pageSize = 20 }: FetchTerms): Promise<ArtworkParsed[]> => {
+  const queryString = `?has_image=1&page=${page}&limit=${pageSize}${query ? `&q=${query}` : ''}`;
 
   try {
     const response = await clevAPI.get(queryString);
@@ -106,40 +80,8 @@ export const clevelandArtworkCollection = async (terms: QueryTerms): Promise<Art
     throw error;
   }
 };
-  
-  
-  
 
-// Sort artworks by artist name
-export const sortByArtist = (data: ArtworkParsed[], sortOrder: 'asc' | 'desc'): ArtworkParsed[] => {
-  return data.sort((a, b) => {
-    const artistA = a.creator.toLowerCase();
-    const artistB = b.creator.toLowerCase();
-
-    if (artistA < artistB) {
-      return sortOrder === 'asc' ? -1 : 1;
-    }
-    if (artistA > artistB) {
-      return sortOrder === 'asc' ? 1 : -1;
-    }
-    return 0;
-  });
-};
-
-// Sort artworks by date
-export const sortByDate = (data: ArtworkParsed[], sortOrder: 'asc' | 'desc'): ArtworkParsed[] => {
-  return data.sort((a, b) => {
-    const dateA = a.sortableDate;
-    const dateB = b.sortableDate;
-
-    if (dateA === 'Unknown') return 1;
-    if (dateB === 'Unknown') return -1;
-
-    return sortOrder === 'asc' ? dateA.localeCompare(dateB) : dateB.localeCompare(dateA);
-  });
-};
-
-// Component for handling the page and search
+// Example of how you'd fetch data in a component
 const ArtworksGallery = () => {
   const [query, setQuery] = useState<string>(''); // Search query state
   const [currentPage, setCurrentPage] = useState<number>(1); // Current page state

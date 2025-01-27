@@ -102,9 +102,6 @@ const ArtworkCard: React.FC<ArtworkCardProps> = ({ artwork, onFavouriteToggle, i
           <Typography variant="body1" color="text.primary" gutterBottom>
             {artwork.description || "No description available."}
           </Typography>
-          <Typography variant="body2" color="text.secondary" gutterBottom>
-            Museum: {artwork.museum}
-          </Typography>
           <Typography variant="body2" color="primary">
             <a
               href={artwork.link}

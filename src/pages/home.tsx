@@ -13,7 +13,7 @@ const Home: React.FC = () => {
         flexDirection: 'column',
         alignItems: 'center',
         padding: 4,
-        paddingTop: 2, // Adjusts the top padding to bring content closer to the top
+        paddingTop: 2, 
       }}
     >
       <Container maxWidth="lg">
@@ -22,7 +22,7 @@ const Home: React.FC = () => {
           sx={{
             fontFamily: '"Crimson Text", serif',
             fontWeight: 'bold',
-            marginBottom: 2, // Reduced margin for better spacing
+            marginBottom: 2,
             textAlign: 'center',
           }}
         >
@@ -37,7 +37,7 @@ const Home: React.FC = () => {
             fontFamily: '"Roboto", sans-serif',
             color: '#5a5a5a',
             textAlign: 'center',
-            marginBottom: 4, // Spacing before the images
+            marginBottom: 4,
             lineHeight: 1.6,
           }}
         >

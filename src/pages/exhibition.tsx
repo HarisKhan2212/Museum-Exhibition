@@ -95,7 +95,7 @@ const ExhibitionPage: React.FC = () => {
         >
           Explore the {currentMuseum === "cleveland" ? "Cleveland Museum of Art" : "Science Museum"} Collection!
         </Typography>
-
+  
         {/* Museum Selection */}
         <Box sx={{ display: "flex", justifyContent: "center", marginBottom: 4 }}>
           <Button
@@ -107,7 +107,7 @@ const ExhibitionPage: React.FC = () => {
             }}
             disabled={currentMuseum === "cleveland"}
             sx={{ 
-              margin: 1, 
+              margin: 1,
               textTransform: "capitalize", 
               borderRadius: 2, 
               fontWeight: "bold" 
@@ -133,7 +133,7 @@ const ExhibitionPage: React.FC = () => {
             Science Museum
           </Button>
         </Box>
-
+  
         {/* Search Input */}
         <Box sx={{ display: "flex", justifyContent: "center", marginBottom: 4 }}>
           <TextField
@@ -150,7 +150,10 @@ const ExhibitionPage: React.FC = () => {
           />
           <Button
             variant="contained"
-            onClick={() => setPage(1)}
+            onClick={() => {
+              setPage(1);
+              window.scrollTo(0, 0); // Scroll to the top when searching
+            }}
             sx={{ 
               marginLeft: 2, 
               textTransform: "capitalize", 
@@ -161,11 +164,11 @@ const ExhibitionPage: React.FC = () => {
             Search
           </Button>
         </Box>
-
+  
         {/* Loading and Error State */}
         {loading && <CircularProgress sx={{ display: "block", margin: "20px auto" }} />}
         {error && <Typography color="error" align="center">{error}</Typography>}
-
+  
         {/* Artwork Results Grid */}
         <Grid container spacing={4} justifyContent="center">
           {results.map((item) => (
@@ -178,37 +181,57 @@ const ExhibitionPage: React.FC = () => {
             </Grid>
           ))}
         </Grid>
-
-        {/* Pagination Controls */}
-        <Box sx={{ display: "flex", justifyContent: "center", marginTop: 4 }}>
-          <Button
-            variant="outlined"
-            disabled={page === 1}
-            onClick={() => setPage((prevPage) => Math.max(prevPage - 1, 1))}
-            sx={{ 
-              marginRight: 2, 
-              textTransform: "capitalize", 
-              fontWeight: "bold", 
-              borderRadius: 2 
-            }}
-          >
-            Previous
-          </Button>
-          <Button
-            variant="outlined"
-            onClick={() => setPage((prevPage) => prevPage + 1)}
-            sx={{ 
-              textTransform: "capitalize", 
-              fontWeight: "bold", 
-              borderRadius: 2 
-            }}
-          >
-            Next
-          </Button>
-        </Box>
       </Container>
+  
+      {/* Floating Pagination Controls */}
+      <Box 
+        sx={{
+          position: "fixed", 
+          bottom: 20, // Distance from the bottom of the viewport
+          left: "50%", 
+          transform: "translateX(-50%)", // Centers the buttons horizontally
+          display: "flex", 
+          justifyContent: "center", 
+          width: "100%", // Ensures it stays at the bottom
+          zIndex: 1000, // Ensures buttons are above other content
+        }}
+      >
+        <Button
+          variant="outlined"
+          disabled={page === 1}
+          onClick={() => {
+            setPage((prevPage) => Math.max(prevPage - 1, 1));
+            window.scrollTo(0, 0); // Scroll to the top when navigating
+          }}
+          sx={{ 
+            marginRight: 2, 
+            textTransform: "capitalize", 
+            fontWeight: "bold", 
+            borderRadius: 2, 
+            backgroundColor: "white", // White background for the button
+          }}
+        >
+          Previous
+        </Button>
+        <Button
+          variant="outlined"
+          onClick={() => {
+            setPage((prevPage) => prevPage + 1);
+            window.scrollTo(0, 0); // Scroll to the top when navigating
+          }}
+          sx={{ 
+            textTransform: "capitalize", 
+            fontWeight: "bold", 
+            borderRadius: 2, 
+            backgroundColor: "white", // White background for the button
+          }}
+        >
+          Next
+        </Button>
+      </Box>
     </Box>
   );
-};
+  
+}  
 
 export default ExhibitionPage;
