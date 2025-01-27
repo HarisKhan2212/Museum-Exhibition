@@ -1,4 +1,6 @@
+// All imports should be at the top
 import axios, { AxiosResponse } from 'axios';
+import React, { useState, useEffect, useCallback } from 'react';
 
 // Define types for the Cleveland Museum artwork data
 interface Creator {
@@ -39,8 +41,9 @@ interface ArtworkParsed {
 
 interface QueryTerms {
   type?: string;
-  page?: number; // Added page property to support pagination
-  pageSize?: number; // Added pageSize property for dynamic control
+  query?: string;
+  page?: number;
+  pageSize?: number; 
 }
 
 // Cleveland Museum API setup
@@ -86,29 +89,26 @@ export const getOneClevArt = (id: string): Promise<ArtworkParsed> => {
 
 // Fetch a collection of artworks
 export const clevelandArtworkCollection = async (terms: QueryTerms): Promise<ArtworkParsed[]> => {
-  const { type, page, pageSize } = terms;
-  let queryString = "?q=1&has_image=1";
+  const { query, page = 1 } = terms;
+  const pageSize = 20;
+  
+  let queryString = `?has_image=1&page=${page}&limit=${pageSize}`;
 
-  if (type) {
-    queryString += `&classification_type=${type}`;
-  }
-
-  if (page) {
-    queryString += `&page=${page}`;
-  }
-
-  if (pageSize) {
-    queryString += `&limit=${pageSize}`;
+  if (query) {
+    queryString += `&q=${query}`;
   }
 
   try {
     const response = await clevAPI.get(queryString);
-    return response.data.data.map((item: Artwork) => parsingClevData(item)); 
+    return response.data.data.map((item: Artwork) => parsingClevData(item));
   } catch (error) {
     console.error("Error fetching Cleveland artworks:", error);
     throw error;
   }
 };
+  
+  
+  
 
 // Sort artworks by artist name
 export const sortByArtist = (data: ArtworkParsed[], sortOrder: 'asc' | 'desc'): ArtworkParsed[] => {
@@ -138,3 +138,71 @@ export const sortByDate = (data: ArtworkParsed[], sortOrder: 'asc' | 'desc'): Ar
     return sortOrder === 'asc' ? dateA.localeCompare(dateB) : dateB.localeCompare(dateA);
   });
 };
+
+// Component for handling the page and search
+const ArtworksGallery = () => {
+  const [query, setQuery] = useState<string>(''); // Search query state
+  const [currentPage, setCurrentPage] = useState<number>(1); // Current page state
+  const [results, setResults] = useState<ArtworkParsed[]>([]); // Artworks results
+  const [loading, setLoading] = useState<boolean>(false); // Loading state
+  const [error, setError] = useState<string>(''); // Error state
+
+  const fetchArtworks = useCallback(async () => {
+    setLoading(true);
+    setError("");
+
+    try {
+      const data = await clevelandArtworkCollection({
+        query,
+        page: currentPage,
+      });
+
+      setResults(data);
+    } catch (err) {
+      setError("Failed to fetch artworks. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  }, [query, currentPage]);
+
+  useEffect(() => {
+    fetchArtworks();
+  }, [fetchArtworks]);
+
+  return (
+    <div>
+      <input
+        type="text"
+        placeholder="Search artworks"
+        value={query}
+        onChange={(e) => setQuery(e.target.value)}
+      />
+      <div>
+        {loading && <div>Loading...</div>}
+        {error && <div>{error}</div>}
+
+        {/* Render Artwork Results */}
+        <div>
+          {results.map((art) => (
+            <div key={art.key}>
+              <img src={art.image} alt={art.title} />
+              <h3>{art.title}</h3>
+              <p>{art.creator}</p>
+              <p>{art.description}</p>
+            </div>
+          ))}
+        </div>
+
+        {/* Pagination Controls */}
+        <button disabled={currentPage === 1} onClick={() => setCurrentPage(currentPage - 1)}>
+          Previous
+        </button>
+        <button onClick={() => setCurrentPage(currentPage + 1)}>
+          Next
+        </button>
+      </div>
+    </div>
+  );
+};
+
+export default ArtworksGallery;

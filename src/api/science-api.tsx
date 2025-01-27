@@ -1,7 +1,5 @@
 import axios from "axios";
 
-
-
 // Fetch a single object by ID from Science Museum API
 export const fetchObjectById = async (id: string) => {
   try {
@@ -63,7 +61,7 @@ export const ScienceMuseumArtworkCollection = async (
   const queryParams = {
     q: terms.type || "",
     "page[number]": terms.page || 1,
-    "page[size]": 12,
+    "page[size]": 20,
     sort: "-date",
   };
 
