@@ -37,6 +37,8 @@ Open your browser and visit: http://localhost:3000
 
 You can now interact with the Exhibition Curation Platform locally!
 
+Disclaimer! the account system is currently not used for anything so no test account is needed.
+
 Future Enhancements:
 Add more filtering options based on exhibition types and dates.
 Implement advanced search functionality to allow users to find specific artworks.
