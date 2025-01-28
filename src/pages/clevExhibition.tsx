@@ -1,20 +1,49 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { clevelandArtworkCollection } from "../api/cle-api";
+import { clevelandArtworkCollection, getArtworkTypes, sortByArtist, sortByDate, sortByType } from "../api/cle-api";
 import ArtworkCard from "../components/artworkCard";
-import { Box, Button, Typography, Grid, CircularProgress, Container, FormControl, InputLabel, Select, MenuItem, Radio, RadioGroup, FormControlLabel, SelectChangeEvent } from "@mui/material";
-import { sortByArtist, sortByDate } from "../api/cle-api";
+import { 
+  Box, 
+  Button, 
+  Typography, 
+  Grid, 
+  CircularProgress, 
+  Container, 
+  FormControl, 
+  InputLabel, 
+  Select, 
+  MenuItem, 
+  Radio, 
+  RadioGroup, 
+  FormControlLabel, 
+  SelectChangeEvent 
+} from "@mui/material";
 
 const ClevelandExhibitionPage: React.FC = () => {
   const [results, setResults] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [favourites, setFavourites] = useState<any[]>([]);
+  const [availableTypes, setAvailableTypes] = useState<string[]>([]);
+  const [selectedType, setSelectedType] = useState<string>("");
 
   const [page, setPage] = useState(1);
   const pageSize = 20;
 
   const [sortBy, setSortBy] = useState("artist");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
+
+  // Fetch available artwork types on component mount
+  useEffect(() => {
+    const fetchTypes = async () => {
+      try {
+        const types = await getArtworkTypes();
+        setAvailableTypes(types);
+      } catch (err) {
+        console.error("Error fetching artwork types:", err);
+      }
+    };
+    fetchTypes();
+  }, []);
 
   const handleFavouriteToggle = (artwork: any) => {
     setFavourites((prevFavourites) => {
@@ -33,10 +62,8 @@ const ClevelandExhibitionPage: React.FC = () => {
     setError("");
   
     try {
-      // Only pass type to clevelandArtworkCollection if it doesn't accept page/pageSize
-      const data = await clevelandArtworkCollection({ type: "" });
+      const data = await clevelandArtworkCollection({ type: selectedType });
       
-      // Add pagination logic here manually if needed
       const paginatedData = data.slice((page - 1) * pageSize, page * pageSize);
       
       const processedData = Array.isArray(paginatedData)
@@ -46,10 +73,21 @@ const ClevelandExhibitionPage: React.FC = () => {
           }))
         : [];
   
-      // Continue with your sorting logic
-      const sortedData = sortBy === "artist"
-        ? sortByArtist(processedData, sortOrder)
-        : sortByDate(processedData, sortOrder);
+      // Updated sorting logic to include type
+      let sortedData;
+      switch (sortBy) {
+        case "artist":
+          sortedData = sortByArtist(processedData, sortOrder);
+          break;
+        case "date":
+          sortedData = sortByDate(processedData, sortOrder);
+          break;
+        case "type":
+          sortedData = sortByType(processedData, sortOrder);
+          break;
+        default:
+          sortedData = processedData;
+      }
   
       setResults(sortedData);
     } catch (err) {
@@ -58,7 +96,7 @@ const ClevelandExhibitionPage: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  }, [page, sortBy, sortOrder]);
+  }, [page, sortBy, sortOrder, selectedType]);
 
   useEffect(() => {
     const storedFavourites = localStorage.getItem("favourites");
@@ -82,6 +120,10 @@ const ClevelandExhibitionPage: React.FC = () => {
     setSortOrder(event.target.value as "asc" | "desc");
   };
 
+  const handleTypeChange = (event: SelectChangeEvent<string>) => {
+    setSelectedType(event.target.value);
+  };
+
   return (
     <Box sx={{ backgroundColor: "#f4f1e1", minHeight: "100vh", padding: 4 }}>
       <Container maxWidth="lg">
@@ -99,6 +141,21 @@ const ClevelandExhibitionPage: React.FC = () => {
             >
               <MenuItem value="artist">Artist</MenuItem>
               <MenuItem value="date">Date</MenuItem>
+              <MenuItem value="type">Type</MenuItem>
+            </Select>
+          </FormControl>
+
+          <FormControl sx={{ marginRight: 2 }}>
+            <InputLabel>Filter by Type</InputLabel>
+            <Select
+              value={selectedType}
+              onChange={handleTypeChange}
+              label="Filter by Type"
+            >
+              <MenuItem value="">All Types</MenuItem>
+              {availableTypes.map((type) => (
+                <MenuItem key={type} value={type}>{type}</MenuItem>
+              ))}
             </Select>
           </FormControl>
 
@@ -121,7 +178,7 @@ const ClevelandExhibitionPage: React.FC = () => {
             onClick={() => fetchMuseumData()}
             sx={{ marginLeft: 2 }}
           >
-            Apply Sorting
+            Apply Filters
           </Button>
         </Box>
 
@@ -141,7 +198,6 @@ const ClevelandExhibitionPage: React.FC = () => {
         </Grid>
       </Container>
 
-      {/* Pagination Controls */}
       <Box sx={{ position: "fixed", bottom: 20, left: "50%", transform: "translateX(-50%)", display: "flex", justifyContent: "center", width: "100%" }}>
         <Button
           variant="outlined"

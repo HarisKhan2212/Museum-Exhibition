@@ -26,7 +26,6 @@ export const fetchObjectById = async (id: string) => {
     const response = await axios.get(`${ScienceMuseumAPI}/objects/${id}`, {
       headers: {
         Accept: "application/json",
-        "User-Agent": "YourProjectName/1.0",
       },
     });
     return response.data;
@@ -42,7 +41,6 @@ const ScienceMuseumAPI = axios.create({
   baseURL: "https://collection.sciencemuseumgroup.org.uk",
   headers: {
     Accept: "application/json",
-    "User-Agent": "ExhibitionCurationPlatform/1.0",
   },
 });
 
@@ -61,6 +59,8 @@ const parseScienceMuseumData = (item: any): Artwork => {
 
   const imagePath =
     item.attributes?.multimedia?.[0]?.["@processed"]?.medium?.location;
+
+    
 
   return {
     id: item.id,
