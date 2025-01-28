@@ -6,8 +6,9 @@ import Home from './pages/home';
 import ArtworkCard from './components/artworkCard';
 import FavouritesPage from './pages/favourites';
 import { fetchObjectById } from './api/science-api';
-import ExhibitionPage from './pages/exhibition';
 import Login from './components/login';
+import ClevelandExhibitionPage from './pages/clevExhibition';
+import ScienceExhibitionPage from './pages/sciExhibition';
 
 const App: React.FC = () => {
   const [artwork, setArtwork] = useState<any | null>(null);
@@ -67,95 +68,101 @@ const App: React.FC = () => {
             Art Gallery
           </Typography>
           <Box
-  sx={{
-    display: 'flex',
-    justifyContent: 'center',
-    gap: 2,
-    marginBottom: '20px',
-  }}
->
-  <Button
-    variant="contained"
-    component={Link}
-    to="/"
-    sx={{
-      backgroundColor: '#a1887f', // Muted taupe
-      color: '#fff',
-      '&:hover': {
-        backgroundColor: '#8d6e63', // Darker taupe
-      },
-      borderRadius: '8px',
-      padding: '8px 16px',
-    }}
-  >
-    Home
-  </Button>
-  <Button
-    variant="contained"
-    component={Link}
-    to="/login"
-    sx={{
-      backgroundColor: '#bcaaa4', // Warm beige
-      color: '#fff',
-      '&:hover': {
-        backgroundColor: '#a1887f', // Muted taupe
-      },
-      borderRadius: '8px',
-      padding: '8px 16px',
-    }}
-  >
-    Login
-  </Button>
-  <Button
-    variant="contained"
-    component={Link}
-    to="/exhibition"
-    sx={{
-      backgroundColor: '#c5e1a5', // Soft green
-      color: '#fff',
-      '&:hover': {
-        backgroundColor: '#aed581', // Slightly darker green
-      },
-      borderRadius: '8px',
-      padding: '8px 16px',
-    }}
-  >
-    Exhibition
-  </Button>
-  <Button
-    variant="contained"
-    component={Link}
-    to="/favourites"
-    sx={{
-      backgroundColor: '#b0bec5', // Light grayish blue
-      color: '#fff',
-      '&:hover': {
-        backgroundColor: '#90a4ae', // Darker grayish blue
-      },
-      borderRadius: '8px',
-      padding: '8px 16px',
-    }}
-  >
-    Favourites
-  </Button>
-</Box>
-
+            sx={{
+              display: 'flex',
+              justifyContent: 'center',
+              gap: 2,
+              marginBottom: '20px',
+            }}
+          >
+            <Button
+              variant="contained"
+              component={Link}
+              to="/"
+              sx={{
+                backgroundColor: '#a1887f',
+                color: '#fff',
+                '&:hover': {
+                  backgroundColor: '#8d6e63',
+                },
+                borderRadius: '8px',
+                padding: '8px 16px',
+              }}
+            >
+              Home
+            </Button>
+            <Button
+              variant="contained"
+              component={Link}
+              to="/login"
+              sx={{
+                backgroundColor: '#bcaaa4',
+                color: '#fff',
+                '&:hover': {
+                  backgroundColor: '#a1887f',
+                },
+                borderRadius: '8px',
+                padding: '8px 16px',
+              }}
+            >
+              Login
+            </Button>
+            <Button
+              variant="contained"
+              component={Link}
+              to="/cleveland"
+              sx={{
+                backgroundColor: '#c5e1a5',
+                color: '#fff',
+                '&:hover': {
+                  backgroundColor: '#aed581',
+                },
+                borderRadius: '8px',
+                padding: '8px 16px',
+              }}
+            >
+              Cleveland Museum Exhibition
+            </Button>
+            <Button
+              variant="contained"
+              component={Link}
+              to="/science"
+              sx={{
+                backgroundColor: '#81c784',
+                color: '#fff',
+                '&:hover': {
+                  backgroundColor: '#66bb6a',
+                },
+                borderRadius: '8px',
+                padding: '8px 16px',
+              }}
+            >
+              Science Museum Exhibition
+            </Button>
+            <Button
+              variant="contained"
+              component={Link}
+              to="/favourites"
+              sx={{
+                backgroundColor: '#b0bec5',
+                color: '#fff',
+                '&:hover': {
+                  backgroundColor: '#90a4ae',
+                },
+                borderRadius: '8px',
+                padding: '8px 16px',
+              }}
+            >
+              Favourites
+            </Button>
+          </Box>
         </Box>
 
         <Routes key={window.location.pathname}>
-          <Route path="/exhibition" element={<ExhibitionPage />} />
           <Route path="/" element={<Home />} />
           <Route path="/login" element={<Login />} />
-          <Route
-            path="/rijk/:artworkId"
-            element={
-              <ArtworkCard
-                artwork={artwork}
-                onFavouriteToggle={handleFavouriteToggle}
-                isFavourite={favourites.some((fav) => fav.id === artwork?.id)}
-              />
-            }
-          />
+          <Route path="/cleveland" element={<ClevelandExhibitionPage />} />
+          <Route path="/science" element={<ScienceExhibitionPage />} />
           <Route
             path="/va/:artworkId"
             element={

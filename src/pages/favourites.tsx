@@ -50,12 +50,12 @@ const FavouritesPage: React.FC<{
         ) : (
           <Grid container spacing={4}>
             {favourites.map((artwork, index) => (
-              <Grid item xs={12} sm={6} md={4} key={artwork.id || index}>
+              <Grid item xs={12} sm={6} md={4} key={artwork.uniqueKey || index}>
                 <Card sx={{ borderRadius: '16px', boxShadow: 3 }}>
                   <CardMedia
                     component="img"
                     height="200"
-                    image={artwork.image || 'https://via.placeholder.com/300x200'} // Placeholder image
+                    image={artwork.image || 'https://via.placeholder.com/300x200'}
                     alt={artwork.title || 'Artwork'}
                     sx={{ borderRadius: '16px 16px 0 0' }}
                   />
@@ -90,7 +90,3 @@ const FavouritesPage: React.FC<{
 };
 
 export default FavouritesPage;
-
-
-
-

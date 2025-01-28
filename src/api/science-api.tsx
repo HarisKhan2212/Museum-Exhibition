@@ -1,5 +1,24 @@
 import axios from "axios";
-import { Artwork, FetchTerms } from "./apiMuseum";
+
+
+export interface Artwork {
+  id: string;
+  title: string;
+  artist: string;
+  image: string;
+  description: string;
+  onDisplay?: string;
+  creationDate?: string;
+  sortableDate?: number;
+  imageUrls?: string[];
+  fullImageUrls?: string[];
+}
+
+export interface FetchTerms {
+  type?: string;
+  page?: number;
+  selectedMuseums?: string[];
+}
 
 // Fetch a single object by ID from Science Museum API
 export const fetchObjectById = async (id: string) => {
@@ -16,7 +35,6 @@ export const fetchObjectById = async (id: string) => {
     throw error;
   }
 };
-
 
 
 // Base API client for Science Museum
