@@ -42,6 +42,14 @@ const ArtworkCard: React.FC<ArtworkCardProps> = ({ artwork, onFavouriteToggle, i
   const handleOpenModal = () => setIsModalOpen(true);
   const handleCloseModal = () => setIsModalOpen(false);
 
+  // Function to truncate title to 1 line
+  const truncateTitle = (title: string, limit: number = 30) => {
+    if (title.length > limit) {
+      return title.slice(0, limit) + "...";
+    }
+    return title;
+  };
+
   // Function to limit description to 2 lines
   const truncateDescription = (description: string, limit: number = 100) => {
     if (description.length > limit) {
@@ -66,7 +74,7 @@ const ArtworkCard: React.FC<ArtworkCardProps> = ({ artwork, onFavouriteToggle, i
         <CardMedia component="img" height="250" image={artwork.image} alt={artwork.title} />
         <CardContent>
           <Typography variant="h6" component="div">
-            {artwork.title}
+            {truncateTitle(artwork.title)}
           </Typography>
           <Typography
             variant="body2"
@@ -74,7 +82,7 @@ const ArtworkCard: React.FC<ArtworkCardProps> = ({ artwork, onFavouriteToggle, i
             sx={{
               display: "-webkit-box",
               WebkitBoxOrient: "vertical",
-              WebkitLineClamp: 2,
+              WebkitLineClamp: 2,  // Limit description to two lines
               overflow: "hidden",
               textOverflow: "ellipsis",
             }}
@@ -94,26 +102,26 @@ const ArtworkCard: React.FC<ArtworkCardProps> = ({ artwork, onFavouriteToggle, i
       </Card>
 
       {/* Enhanced Modal for expanded view */}
-      <Dialog 
-        open={isModalOpen} 
-        onClose={handleCloseModal} 
-        fullWidth 
+      <Dialog
+        open={isModalOpen}
+        onClose={handleCloseModal}
+        fullWidth
         maxWidth="md"
         PaperProps={{
           sx: {
             borderRadius: 2,
-            maxHeight: '90vh'
-          }
+            maxHeight: "90vh",
+          },
         }}
       >
-        <DialogTitle 
-          sx={{ 
-            backgroundColor: 'primary.main', 
-            color: 'white',
-            py: 2
+        <DialogTitle
+          sx={{
+            backgroundColor: "primary.main",
+            color: "white",
+            py: 2,
           }}
         >
-          <Typography variant="h5" component="div" sx={{ fontWeight: 'bold' }}>
+          <Typography variant="h5" component="div" sx={{ fontWeight: "bold" }}>
             {artwork.title}
           </Typography>
           {artwork.artist && (
@@ -123,24 +131,24 @@ const ArtworkCard: React.FC<ArtworkCardProps> = ({ artwork, onFavouriteToggle, i
           )}
         </DialogTitle>
         <DialogContent sx={{ p: 4 }}>
-          <Box sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' }, gap: 3 }}>
+          <Box sx={{ display: "flex", flexDirection: { xs: "column", md: "row" }, gap: 3 }}>
             {/* Image Section */}
-            <Box sx={{ flex: '1 1 auto', maxWidth: { xs: '100%', md: '50%' } }}>
+            <Box sx={{ flex: "1 1 auto", maxWidth: { xs: "100%", md: "50%" } }}>
               <CardMedia
                 component="img"
                 image={artwork.image}
                 alt={artwork.title}
-                sx={{ 
-                  width: '100%',
-                  height: 'auto',
+                sx={{
+                  width: "100%",
+                  height: "auto",
                   borderRadius: 1,
-                  boxShadow: 3
+                  boxShadow: 3,
                 }}
               />
             </Box>
 
             {/* Details Section */}
-            <Box sx={{ flex: '1 1 auto' }}>
+            <Box sx={{ flex: "1 1 auto" }}>
               {/* Artwork Type */}
               {artwork.type && (
                 <Typography variant="h6" color="primary" gutterBottom>
@@ -157,11 +165,11 @@ const ArtworkCard: React.FC<ArtworkCardProps> = ({ artwork, onFavouriteToggle, i
 
               {/* Display Status */}
               {artwork.onDisplay && (
-                <Typography 
-                  variant="body1" 
-                  sx={{ 
-                    color: 'success.main',
-                    mb: 2
+                <Typography
+                  variant="body1"
+                  sx={{
+                    color: "success.main",
+                    mb: 2,
                   }}
                 >
                   {artwork.onDisplay}
@@ -171,24 +179,18 @@ const ArtworkCard: React.FC<ArtworkCardProps> = ({ artwork, onFavouriteToggle, i
               <Divider sx={{ my: 2 }} />
 
               {/* Description Section */}
-              <Typography 
-                variant="h6" 
-                sx={{ 
-                  fontWeight: 'bold',
-                  mb: 2
-                }}
-              >
+              <Typography variant="h6" sx={{ fontWeight: "bold", mb: 2 }}>
                 Description:
               </Typography>
-              <Paper 
+              <Paper
                 elevation={3}
                 sx={{
                   p: 2,
-                  bgcolor: 'background.default',
+                  bgcolor: "background.default",
                   border: 1,
-                  borderColor: 'primary.light',
+                  borderColor: "primary.light",
                   borderRadius: 2,
-                  mb: 2
+                  mb: 2,
                 }}
               >
                 <Typography variant="body1">
@@ -198,6 +200,7 @@ const ArtworkCard: React.FC<ArtworkCardProps> = ({ artwork, onFavouriteToggle, i
 
               {/* Museum Info */}
               <Typography variant="body2" color="text.secondary" sx={{ mt: 2 }}>
+                Location: {artwork.museum}
               </Typography>
             </Box>
           </Box>
@@ -206,15 +209,11 @@ const ArtworkCard: React.FC<ArtworkCardProps> = ({ artwork, onFavouriteToggle, i
           <IconButton
             onClick={() => onFavouriteToggle(artwork)}
             color="primary"
-            sx={{ mr: 'auto' }}
+            sx={{ mr: "auto" }}
           >
             {isFavourite ? <FavoriteIcon /> : <FavoriteBorderIcon />}
           </IconButton>
-          <Button 
-            onClick={handleCloseModal} 
-            variant="contained" 
-            color="primary"
-          >
+          <Button onClick={handleCloseModal} variant="contained" color="primary">
             Close
           </Button>
         </DialogActions>
