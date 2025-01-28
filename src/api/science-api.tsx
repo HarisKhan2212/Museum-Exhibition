@@ -1,6 +1,5 @@
 import axios from "axios";
 
-
 export interface Artwork {
   id: string;
   title: string;

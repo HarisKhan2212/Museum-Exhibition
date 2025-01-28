@@ -82,7 +82,7 @@ const ScienceExhibitionPage: React.FC = () => {
             variant="contained"
             onClick={() => {
               setPage(1);
-              window.scrollTo(0, 0); // Scroll to top when searching
+              window.scrollTo(0, 0);
             }}
             sx={{ marginLeft: 2, textTransform: "capitalize", fontWeight: "bold", borderRadius: 2 }}
           >
@@ -124,21 +124,36 @@ const ScienceExhibitionPage: React.FC = () => {
 
       {/* Pagination Controls */}
       <Box sx={{ position: "fixed", bottom: 20, left: "50%", transform: "translateX(-50%)", display: "flex", justifyContent: "center", width: "100%" }}>
-        <Button
-          variant="outlined"
-          disabled={page === 1}
-          onClick={() => { setPage((prevPage) => Math.max(prevPage - 1, 1)); window.scrollTo(0, 0); }}
-          sx={{ marginRight: 2 }}
-        >
-          Previous
-        </Button>
-        <Button
-          variant="outlined"
-          onClick={() => { setPage((prevPage) => prevPage + 1); window.scrollTo(0, 0); }}
-        >
-          Next
-        </Button>
-      </Box>
+  <Button
+    variant="outlined"
+    disabled={page === 1}
+    onClick={() => setPage(page - 1)}
+    sx={{
+      backgroundColor: '#1976d2',  
+      color: 'white',    
+      '&:hover': {
+        backgroundColor: '#1565c0', 
+      }
+    }}
+  >
+    Previous
+  </Button>
+  <Button
+    variant="outlined"
+    onClick={() => setPage(page + 1)}
+    sx={{
+      marginLeft: 2,
+      backgroundColor: '#1976d2', 
+      color: 'white',      
+      '&:hover': {
+        backgroundColor: '#1565c0', 
+      }
+    }}
+  >
+    Next
+  </Button>
+</Box>
+
     </Box>
   );
 };

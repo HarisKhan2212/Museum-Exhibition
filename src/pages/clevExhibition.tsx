@@ -32,7 +32,6 @@ const ClevelandExhibitionPage: React.FC = () => {
   const [sortBy, setSortBy] = useState("artist");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
 
-  // Fetch available artwork types on component mount
   useEffect(() => {
     const fetchTypes = async () => {
       try {
@@ -46,6 +45,7 @@ const ClevelandExhibitionPage: React.FC = () => {
   }, []);
 
   const handleFavouriteToggle = (artwork: any) => {
+    console.log('Toggling favourite for artwork with uniqueKey:', artwork.uniqueKey); // Log added
     setFavourites((prevFavourites) => {
       const isFavourite = prevFavourites.some((fav) => fav.uniqueKey === artwork.uniqueKey);
       const updatedFavourites = isFavourite
@@ -73,7 +73,6 @@ const ClevelandExhibitionPage: React.FC = () => {
           }))
         : [];
   
-      // Updated sorting logic to include type
       let sortedData;
       switch (sortBy) {
         case "artist":
@@ -134,11 +133,7 @@ const ClevelandExhibitionPage: React.FC = () => {
         <Box sx={{ display: 'flex', justifyContent: 'center', marginBottom: 4 }}>
           <FormControl sx={{ marginRight: 2 }}>
             <InputLabel>Sort By</InputLabel>
-            <Select
-              value={sortBy}
-              onChange={handleSortByChange}
-              label="Sort By"
-            >
+            <Select value={sortBy} onChange={handleSortByChange} label="Sort By">
               <MenuItem value="artist">Artist</MenuItem>
               <MenuItem value="date">Date</MenuItem>
               <MenuItem value="type">Type</MenuItem>
@@ -147,11 +142,7 @@ const ClevelandExhibitionPage: React.FC = () => {
 
           <FormControl sx={{ marginRight: 2 }}>
             <InputLabel>Filter by Type</InputLabel>
-            <Select
-              value={selectedType}
-              onChange={handleTypeChange}
-              label="Filter by Type"
-            >
+            <Select value={selectedType} onChange={handleTypeChange} label="Filter by Type">
               <MenuItem value="">All Types</MenuItem>
               {availableTypes.map((type) => (
                 <MenuItem key={type} value={type}>{type}</MenuItem>
@@ -160,24 +151,13 @@ const ClevelandExhibitionPage: React.FC = () => {
           </FormControl>
 
           <FormControl sx={{ marginLeft: 2 }}>
-            <RadioGroup
-              row
-              aria-labelledby="sort-order-group-label"
-              name="sort-order-group"
-              value={sortOrder}
-              onChange={handleSortOrderChange}
-            >
+            <RadioGroup row aria-labelledby="sort-order-group-label" name="sort-order-group" value={sortOrder} onChange={handleSortOrderChange}>
               <FormControlLabel value="asc" control={<Radio />} label="Asc" />
               <FormControlLabel value="desc" control={<Radio />} label="Desc" />
             </RadioGroup>
           </FormControl>
 
-          <Button
-            variant="contained"
-            color="primary"
-            onClick={() => fetchMuseumData()}
-            sx={{ marginLeft: 2 }}
-          >
+          <Button variant="contained" color="primary" onClick={() => fetchMuseumData()} sx={{ marginLeft: 2 }}>
             Apply Filters
           </Button>
         </Box>
@@ -199,21 +179,36 @@ const ClevelandExhibitionPage: React.FC = () => {
       </Container>
 
       <Box sx={{ position: "fixed", bottom: 20, left: "50%", transform: "translateX(-50%)", display: "flex", justifyContent: "center", width: "100%" }}>
-        <Button
-          variant="outlined"
-          disabled={page === 1}
-          onClick={() => setPage(page - 1)}
-        >
-          Previous
-        </Button>
-        <Button
-          variant="outlined"
-          onClick={() => setPage(page + 1)}
-          sx={{ marginLeft: 2 }}
-        >
-          Next
-        </Button>
-      </Box>
+  <Button
+    variant="outlined"
+    disabled={page === 1}
+    onClick={() => setPage(page - 1)}
+    sx={{
+      backgroundColor: '#1976d2',  
+      color: 'white',  
+      '&:hover': {
+        backgroundColor: '#1565c0', 
+      }
+    }}
+  >
+    Previous
+  </Button>
+  <Button
+    variant="outlined"
+    onClick={() => setPage(page + 1)}
+    sx={{
+      marginLeft: 2,
+      backgroundColor: '#1976d2',  
+      color: 'white',   
+      '&:hover': {
+        backgroundColor: '#1565c0', 
+      }
+    }}
+  >
+    Next
+  </Button>
+</Box>
+
     </Box>
   );
 };

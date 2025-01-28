@@ -198,7 +198,6 @@ const ArtworkCard: React.FC<ArtworkCardProps> = ({ artwork, onFavouriteToggle, i
 
               {/* Museum Info */}
               <Typography variant="body2" color="text.secondary" sx={{ mt: 2 }}>
-                Location: {artwork.museum}
               </Typography>
             </Box>
           </Box>

@@ -20,7 +20,6 @@ interface ClevelandArtwork {
 
 // Define the parsed format for the artwork
 interface ParsedArtwork {
-  isClev: boolean;
   onDisplay: string;
   type: string;
   title: string;
@@ -50,7 +49,6 @@ export const parsingClevData = (art: ClevelandArtwork): ParsedArtwork | null => 
     const creator = art.creators?.length === 0 ? "Unknown" : art.creators[0]?.description || "Unknown";
 
     return {
-      isClev: true,
       onDisplay,
       type: art.type || "Unknown",
       title: art.title || "Untitled",
