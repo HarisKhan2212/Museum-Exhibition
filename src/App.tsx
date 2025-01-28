@@ -65,7 +65,7 @@ const App: React.FC = () => {
       <div style={{ backgroundColor: '#fdf6e3', minHeight: '100vh', padding: '20px' }}>
         <Box sx={{ padding: '16px', textAlign: 'center' }}>
           <Typography variant="h4" sx={{ marginBottom: '16px', fontWeight: 'bold' }}>
-            Art Gallery
+            The Museum Exhibition
           </Typography>
           <Box
             sx={{

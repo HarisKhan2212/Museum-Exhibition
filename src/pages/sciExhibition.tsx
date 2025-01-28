@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { ScienceMuseumArtworkCollection } from "../api/science-api";
 import ArtworkCard from "../components/artworkCard";
-import { Box, Button, Typography, Grid, CircularProgress, TextField, Container } from "@mui/material";
+import { Box, Button, Typography, Grid, CircularProgress, TextField, Container, FormControl, InputLabel, Select, MenuItem } from "@mui/material";
 
 const ScienceExhibitionPage: React.FC = () => {
   const [query, setQuery] = useState("");
@@ -12,6 +12,8 @@ const ScienceExhibitionPage: React.FC = () => {
 
   const [page, setPage] = useState(1);
   const pageSize = 20;
+
+  const [selectedType, setSelectedType] = useState<string>("");
 
   const handleFavouriteToggle = (artwork: any) => {
     setFavourites((prevFavourites) => {
@@ -30,7 +32,7 @@ const ScienceExhibitionPage: React.FC = () => {
     setError("");
 
     try {
-      const data = await ScienceMuseumArtworkCollection({ type: query, page });
+      const data = await ScienceMuseumArtworkCollection({ type: selectedType, page });
       const processedData = Array.isArray(data)
         ? data.map((item: any, index: number) => ({
             ...item,
@@ -44,7 +46,7 @@ const ScienceExhibitionPage: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  }, [query, page]);
+  }, [selectedType, page]);
 
   useEffect(() => {
     const storedFavourites = localStorage.getItem("favourites");
@@ -58,7 +60,7 @@ const ScienceExhibitionPage: React.FC = () => {
     setError("");
     setLoading(true);
     fetchMuseumData();
-  }, [query, page, fetchMuseumData]);
+  }, [selectedType, page, fetchMuseumData]);
 
   return (
     <Box sx={{ backgroundColor: "#f4f1e1", minHeight: "100vh", padding: 4 }}>
@@ -86,6 +88,22 @@ const ScienceExhibitionPage: React.FC = () => {
           >
             Search
           </Button>
+        </Box>
+
+        <Box sx={{ display: "flex", justifyContent: "center", marginBottom: 4 }}>
+          <FormControl sx={{ minWidth: 120 }}>
+            <InputLabel>Filter by Type</InputLabel>
+            <Select
+              value={selectedType}
+              onChange={(e) => setSelectedType(e.target.value)}
+              label="Filter by Type"
+            >
+              <MenuItem value="">All Types</MenuItem>
+              <MenuItem value="Science">Science</MenuItem>
+              <MenuItem value="Technology">Technology</MenuItem>
+              <MenuItem value="Engineering">Engineering</MenuItem>
+            </Select>
+          </FormControl>
         </Box>
 
         {loading && <CircularProgress sx={{ display: "block", margin: "20px auto" }} />}
