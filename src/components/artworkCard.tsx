@@ -10,6 +10,9 @@ import {
   DialogTitle,
   DialogActions,
   Button,
+  Paper,
+  Box,
+  Divider,
 } from "@mui/material";
 import FavoriteIcon from "@mui/icons-material/Favorite";
 import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
@@ -23,6 +26,8 @@ interface Artwork {
   description?: string;
   museum: string;
   link: string;
+  creationDate?: string;
+  onDisplay?: string;
 }
 
 interface ArtworkCardProps {
@@ -79,7 +84,7 @@ const ArtworkCard: React.FC<ArtworkCardProps> = ({ artwork, onFavouriteToggle, i
         </CardContent>
         <IconButton
           onClick={(e) => {
-            e.stopPropagation(); // Prevent click from opening modal
+            e.stopPropagation();
             onFavouriteToggle(artwork);
           }}
           aria-label={isFavourite ? "remove from favorites" : "add to favorites"}
@@ -88,33 +93,129 @@ const ArtworkCard: React.FC<ArtworkCardProps> = ({ artwork, onFavouriteToggle, i
         </IconButton>
       </Card>
 
-      {/* Modal for expanded view */}
-      <Dialog open={isModalOpen} onClose={handleCloseModal} fullWidth maxWidth="sm">
-        <DialogTitle>{artwork.title}</DialogTitle>
-        <DialogContent>
-          <CardMedia
-            component="img"
-            height="400"
-            image={artwork.image}
-            alt={artwork.title}
-            sx={{ marginBottom: 2 }}
-          />
-          <Typography variant="body1" color="text.primary" gutterBottom>
-            {artwork.description || "No description available."}
+      {/* Enhanced Modal for expanded view */}
+      <Dialog 
+        open={isModalOpen} 
+        onClose={handleCloseModal} 
+        fullWidth 
+        maxWidth="md"
+        PaperProps={{
+          sx: {
+            borderRadius: 2,
+            maxHeight: '90vh'
+          }
+        }}
+      >
+        <DialogTitle 
+          sx={{ 
+            backgroundColor: 'primary.main', 
+            color: 'white',
+            py: 2
+          }}
+        >
+          <Typography variant="h5" component="div" sx={{ fontWeight: 'bold' }}>
+            {artwork.title}
           </Typography>
-          <Typography variant="body2" color="primary">
-            <a
-              href={artwork.link}
-              target="_blank"
-              rel="noopener noreferrer"
-              style={{ textDecoration: "none", color: "#1976d2" }}
-            >
-              
-            </a>
-          </Typography>
+          {artwork.artist && (
+            <Typography variant="subtitle1" sx={{ mt: 1 }}>
+              by {artwork.artist}
+            </Typography>
+          )}
+        </DialogTitle>
+        <DialogContent sx={{ p: 4 }}>
+          <Box sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' }, gap: 3 }}>
+            {/* Image Section */}
+            <Box sx={{ flex: '1 1 auto', maxWidth: { xs: '100%', md: '50%' } }}>
+              <CardMedia
+                component="img"
+                image={artwork.image}
+                alt={artwork.title}
+                sx={{ 
+                  width: '100%',
+                  height: 'auto',
+                  borderRadius: 1,
+                  boxShadow: 3
+                }}
+              />
+            </Box>
+
+            {/* Details Section */}
+            <Box sx={{ flex: '1 1 auto' }}>
+              {/* Artwork Type */}
+              {artwork.type && (
+                <Typography variant="h6" color="primary" gutterBottom>
+                  {artwork.type}
+                </Typography>
+              )}
+
+              {/* Creation Date */}
+              {artwork.creationDate && (
+                <Typography variant="body1" gutterBottom>
+                  Created: {artwork.creationDate}
+                </Typography>
+              )}
+
+              {/* Display Status */}
+              {artwork.onDisplay && (
+                <Typography 
+                  variant="body1" 
+                  sx={{ 
+                    color: 'success.main',
+                    mb: 2
+                  }}
+                >
+                  {artwork.onDisplay}
+                </Typography>
+              )}
+
+              <Divider sx={{ my: 2 }} />
+
+              {/* Description Section */}
+              <Typography 
+                variant="h6" 
+                sx={{ 
+                  fontWeight: 'bold',
+                  mb: 2
+                }}
+              >
+                Description:
+              </Typography>
+              <Paper 
+                elevation={3}
+                sx={{
+                  p: 2,
+                  bgcolor: 'background.default',
+                  border: 1,
+                  borderColor: 'primary.light',
+                  borderRadius: 2,
+                  mb: 2
+                }}
+              >
+                <Typography variant="body1">
+                  {artwork.description || "No description available."}
+                </Typography>
+              </Paper>
+
+              {/* Museum Info */}
+              <Typography variant="body2" color="text.secondary" sx={{ mt: 2 }}>
+                Location: {artwork.museum}
+              </Typography>
+            </Box>
+          </Box>
         </DialogContent>
-        <DialogActions>
-          <Button onClick={handleCloseModal} color="primary">
+        <DialogActions sx={{ p: 2 }}>
+          <IconButton
+            onClick={() => onFavouriteToggle(artwork)}
+            color="primary"
+            sx={{ mr: 'auto' }}
+          >
+            {isFavourite ? <FavoriteIcon /> : <FavoriteBorderIcon />}
+          </IconButton>
+          <Button 
+            onClick={handleCloseModal} 
+            variant="contained" 
+            color="primary"
+          >
             Close
           </Button>
         </DialogActions>
